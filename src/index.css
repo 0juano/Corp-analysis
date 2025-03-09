@@ -8,6 +8,52 @@ textarea {
   line-height: 1.5;
 }
 
+/* Ensure chat is positioned on the right side */
+.fixed.right-0.top-0.bottom-0 {
+  position: fixed !important;
+  right: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  height: 100% !important;
+  max-height: 100vh !important;
+  width: 24rem !important;
+  max-width: 90% !important;
+}
+
+/* Override any bottom-positioned chat components */
+[class*="Analysis Assistant"] {
+  position: fixed !important;
+  right: 0 !important;
+  top: 0 !important;
+  bottom: auto !important;
+  height: 100% !important;
+}
+
+/* Override Cursor IDE chat component */
+div[class*="bottom-0"][class*="fixed"],
+div[class*="bottom-0"][class*="absolute"] {
+  bottom: auto !important;
+  right: 0 !important;
+  top: 0 !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+}
+
+/* Target specific chat components by their likely class names */
+.analysis-assistant,
+.chat-container,
+.chat-panel,
+.chat-widget,
+.chat-box,
+.chat-window {
+  position: fixed !important;
+  right: 0 !important;
+  top: 0 !important;
+  bottom: auto !important;
+  height: 100% !important;
+  z-index: 9999 !important;
+}
+
 /* Cyberpunk Theme */
 .cyberpunk {
   background: linear-gradient(135deg, #120458 0%, #000000 100%);

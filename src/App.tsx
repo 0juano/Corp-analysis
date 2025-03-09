@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Sun, Moon, ChevronUp, ChevronDown, X, Search, Printer, Send, Bot, ThumbsUp, ThumbsDown, Cpu, Plus, Link as LinkIcon, Minus } from 'lucide-react';
+import { Sun, Moon, ChevronUp, ChevronDown, X, Search, Printer, Send, Bot, Cpu, Plus, Link as LinkIcon } from 'lucide-react';
 import { Tooltip } from 'react-tooltip';
 
 interface Development {
@@ -47,6 +47,7 @@ function App() {
   const [newSourceUrl, setNewSourceUrl] = useState('');
   const [linkPreviews, setLinkPreviews] = useState<Record<string, LinkPreview>>({});
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const [isChatVisible, setIsChatVisible] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     business: true,
     ownership: true,
@@ -240,16 +241,17 @@ function App() {
     if (!isCyberpunk) setIsDarkMode(true);
   };
 
-  const inputClass = `w-full rounded-md text-sm ${
-    isCyberpunk 
-      ? 'bg-opacity-10'
-      : isDarkMode 
-        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-  } border focus:ring-2 focus:ring-blue-500 focus:border-transparent`;
+  const inputClass = `rounded-md border ${
+    isCyberpunk
+      ? 'bg-black bg-opacity-70 border-[#00ff9d] text-[#00ff9d] focus:ring-[#00ff9d] focus:border-[#00ff9d]'
+      : isDarkMode
+        ? 'bg-gray-800 border-gray-700 text-white focus:ring-blue-500 focus:border-blue-500'
+        : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
+  } focus:outline-none focus:ring-2 w-full`;
 
-  const textareaClass = `${inputClass} py-2 px-3 min-h-[2.5rem] resize-y print:min-h-0 print:p-1`;
-  const multilineInputClass = `${inputClass} py-1 px-2 h-8 overflow-hidden resize-none print:p-1`;
+  const textareaClass = `${inputClass} min-h-[100px] resize-none w-full`;
+  
+  const multilineInputClass = `${inputClass} min-h-[60px] resize-none`;
 
   const adjustHeight = (element: HTMLTextAreaElement) => {
     element.style.height = '32px';
@@ -264,12 +266,12 @@ function App() {
 
   return (
     <div className={`min-h-screen ${isCyberpunk ? 'cyberpunk' : isDarkMode ? 'dark bg-gray-900' : 'bg-white'}`}>
-      <div className="flex h-screen">
+      <div className="flex flex-col md:flex-row h-screen relative">
         {/* Main Content */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto pb-0">
           <div className="container mx-auto px-4 py-8 max-w-4xl print:px-2 print:py-1">
             <div className="mb-8 print:mb-2">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
                 <div className="relative">
                   <input
                     type="text"
@@ -324,6 +326,16 @@ function App() {
                       <Moon className="h-5 w-5 text-gray-600" />
                     )}
                   </button>
+                  {/* Chat toggle button for mobile */}
+                  <button
+                    onClick={() => setIsChatVisible(!isChatVisible)}
+                    className={`p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 print:hidden md:hidden ${
+                      isCyberpunk ? 'text-[#00ff9d]' : isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                    }`}
+                    title={isChatVisible ? "Hide chat" : "Show chat"}
+                  >
+                    <Bot className={`h-5 w-5 ${isCyberpunk ? 'glitch' : ''}`} />
+                  </button>
                 </div>
               </div>
               {isin && isin.length !== 12 && (
@@ -353,120 +365,114 @@ function App() {
                     className={textareaClass}
                   />
                   <div className="flex flex-wrap gap-2 items-center mt-2">
-                    {sources.map((source, index) => (
+                    {sources.map((source) => (
                       <div key={source.id} className="relative group">
                         <div className="flex items-center gap-1">
                           <a
                             href={source.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            data-tooltip-id={`source-${source.id}`}
-                            className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-l-full ${
+                            className={`text-xs px-2 py-1 rounded-full ${
                               isCyberpunk
-                                ? 'bg-[#00ff9d] bg-opacity-10 text-[#00ff9d] hover:bg-opacity-20'
+                                ? 'bg-[#00ff9d] bg-opacity-20 text-[#00ff9d] hover:bg-opacity-30'
                                 : isDarkMode
-                                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                            }`}
+                                  ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
+                                  : 'bg-gray-200 text-blue-600 hover:bg-gray-300'
+                            } flex items-center gap-1`}
                           >
                             <LinkIcon className="h-3 w-3" />
-                            <span>({index + 1})</span>
+                            <span className="truncate max-w-[100px] sm:max-w-[150px]">
+                              {linkPreviews[source.url]?.title || new URL(source.url).hostname}
+                            </span>
                           </a>
                           <button
                             onClick={() => handleRemoveSource(source.id)}
-                            className={`inline-flex items-center justify-center px-2 py-1 text-xs rounded-r-full ${
+                            className={`p-1 rounded-full ${
                               isCyberpunk
-                                ? 'bg-[#00ff9d] bg-opacity-10 text-red-400 hover:text-red-300'
-                                : isDarkMode
-                                ? 'bg-gray-700 text-red-400 hover:text-red-300'
-                                : 'bg-gray-200 text-red-500 hover:text-red-600'
-                            }`}
+                                ? 'text-red-400 hover:text-red-300'
+                                : 'text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300'
+                            } opacity-0 group-hover:opacity-100 transition-opacity print:hidden`}
+                            title="Remove source"
                           >
-                            <Minus className="h-3 w-3" />
+                            <X className="h-3 w-3" />
                           </button>
                         </div>
-                        {linkPreviews[source.url] && (
-                          <Tooltip
-                            id={`source-${source.id}`}
-                            place="bottom"
-                            className={`!fixed !z-[99999] max-w-sm ${
-                              isCyberpunk
-                                ? '!bg-[#120458] !text-[#00ff9d] !border !border-[#00ff9d] !shadow-[0_0_10px_rgba(0,255,157,0.3)]'
-                                : isDarkMode
-                                ? '!bg-gray-800'
-                                : '!bg-white !text-gray-900'
-                            } !opacity-100`}
-                            style={{ position: 'fixed' }}
-                          >
+                        <div
+                          data-tooltip-id={`source-preview-${source.id}`}
+                          data-tooltip-content="Loading preview..."
+                          className="absolute bottom-0 left-0"
+                        ></div>
+                        <Tooltip
+                          id={`source-preview-${source.id}`}
+                          place="bottom"
+                          className={`max-w-xs ${isCyberpunk ? 'cyberpunk-tooltip' : ''}`}
+                        >
+                          {linkPreviews[source.url] ? (
                             <div className="p-2">
-                              <div className="font-medium">{linkPreviews[source.url].title}</div>
-                              <div className="text-sm opacity-80 mt-1">{linkPreviews[source.url].description}</div>
-                              {linkPreviews[source.url].image && (
-                                <img
-                                  src={linkPreviews[source.url].image}
-                                  alt=""
-                                  className="mt-2 rounded max-h-32 w-auto"
-                                />
-                              )}
+                              <div className="font-bold mb-1">{linkPreviews[source.url].title}</div>
+                              <div className="text-sm">{linkPreviews[source.url].description}</div>
                             </div>
-                          </Tooltip>
-                        )}
+                          ) : (
+                            "Loading preview..."
+                          )}
+                        </Tooltip>
                       </div>
                     ))}
-                    {!showSourceInput && (
+                    {showSourceInput ? (
+                      <div className="flex items-center gap-1 flex-wrap sm:flex-nowrap">
+                        <input
+                          type="text"
+                          value={newSourceUrl}
+                          onChange={(e) => setNewSourceUrl(e.target.value)}
+                          placeholder="Enter URL"
+                          className={`${inputClass} py-1 px-2 text-sm w-full sm:w-auto`}
+                        />
+                        <div className="flex gap-1 mt-1 sm:mt-0">
+                          <button
+                            onClick={handleAddSource}
+                            className={`px-2 py-1 rounded-md text-xs ${
+                              isCyberpunk
+                                ? 'bg-[#00ff9d] bg-opacity-20 text-[#00ff9d] hover:bg-opacity-30'
+                                : isDarkMode
+                                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                  : 'bg-blue-500 text-white hover:bg-blue-600'
+                            }`}
+                          >
+                            Add
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowSourceInput(false);
+                              setNewSourceUrl('');
+                            }}
+                            className={`px-2 py-1 rounded-md text-xs ${
+                              isCyberpunk
+                                ? 'bg-red-500 bg-opacity-20 text-red-400 hover:bg-opacity-30'
+                                : isDarkMode
+                                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                  : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                            }`}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
                       <button
                         onClick={() => setShowSourceInput(true)}
-                        className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${
-                          isCyberpunk
-                            ? 'bg-[#00ff9d] bg-opacity-10 text-[#00ff9d] hover:bg-opacity-20'
-                            : isDarkMode
-                            ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
-                  {showSourceInput && (
-                    <div className="flex gap-2 items-center mt-2">
-                      <input
-                        type="url"
-                        value={newSourceUrl}
-                        onChange={(e) => setNewSourceUrl(e.target.value)}
-                        placeholder="Enter URL"
-                        className={`${inputClass} flex-grow py-1 px-2`}
-                        onKeyDown={(e) => e.key === 'Enter' && handleAddSource()}
-                      />
-                      <button
-                        onClick={handleAddSource}
-                        className={`px-3 py-1 rounded-md ${
+                        className={`text-xs px-2 py-1 rounded-full ${
                           isCyberpunk
                             ? 'bg-[#00ff9d] bg-opacity-20 text-[#00ff9d] hover:bg-opacity-30'
                             : isDarkMode
-                            ? 'bg-blue-600 text-white hover:bg-blue-700'
-                            : 'bg-blue-500 text-white hover:bg-blue-600'
-                        }`}
+                              ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
+                              : 'bg-gray-200 text-blue-600 hover:bg-gray-300'
+                        } flex items-center gap-1 print:hidden`}
                       >
-                        Add
+                        <Plus className="h-3 w-3" />
+                        <span>Add Source</span>
                       </button>
-                      <button
-                        onClick={() => {
-                          setShowSourceInput(false);
-                          setNewSourceUrl('');
-                        }}
-                        className={`p-1 rounded-md ${
-                          isCyberpunk
-                            ? 'text-red-400 hover:text-red-300'
-                            : isDarkMode
-                            ? 'text-gray-400 hover:text-gray-300'
-                            : 'text-gray-500 hover:text-gray-600'
-                        }`}
-                      >
-                        <X className="h-5 w-5" />
-                      </button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </Section>
 
@@ -528,39 +534,47 @@ function App() {
               </Section>
 
               <Section
-                title="Recent Developments"
+                title="Key Developments"
                 isExpanded={expandedSections.developments}
                 onToggle={() => toggleSection('developments')}
                 isDarkMode={isDarkMode}
                 isCyberpunk={isCyberpunk}
               >
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {formData.developments.filter(d => d.visible).map((development, index) => (
-                    <div key={`development-${index}`} className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleDevelopmentChange(index, 'emoji', development.emoji === 'up' ? 'down' : 'up')}
-                        className={`w-8 h-8 flex items-center justify-center rounded-md flex-shrink-0 ${
-                          development.emoji === 'up'
-                            ? isCyberpunk ? 'text-[#00ff9d]' : 'text-green-500 hover:text-green-600'
-                            : isCyberpunk ? 'text-red-400' : 'text-red-500 hover:text-red-600'
-                        }`}
-                      >
-                        {development.emoji === 'up' ? (
-                          <ThumbsUp className={`h-4 w-4 ${isCyberpunk ? 'glitch' : ''}`} />
-                        ) : (
-                          <ThumbsDown className={`h-4 w-4 ${isCyberpunk ? 'glitch' : ''}`} />
-                        )}
-                      </button>
-                      <textarea
-                        placeholder={`Development ${index + 1}`}
-                        value={development.text}
-                        onChange={(e) => {
-                          handleDevelopmentChange(index, 'text', e.target.value);
-                          adjustHeight(e.target);
-                        }}
-                        onInput={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
-                        className={`${multilineInputClass} flex-grow`}
-                      />
+                    <div key={`development-${index}`} className="flex items-start gap-2">
+                      <div className="flex-shrink-0 mt-2">
+                        <button
+                          onClick={() => handleDevelopmentChange(index, 'emoji', development.emoji === 'up' ? 'down' : 'up')}
+                          className={`p-1 rounded-md ${
+                            development.emoji === 'up'
+                              ? isCyberpunk
+                                ? 'text-[#00ff9d]'
+                                : 'text-green-500 dark:text-green-400'
+                              : isCyberpunk
+                                ? 'text-red-400'
+                                : 'text-red-500 dark:text-red-400'
+                          }`}
+                        >
+                          {development.emoji === 'up' ? (
+                            <ChevronUp className="h-5 w-5" />
+                          ) : (
+                            <ChevronDown className="h-5 w-5" />
+                          )}
+                        </button>
+                      </div>
+                      <div className="flex-grow">
+                        <textarea
+                          placeholder={`Development ${index + 1}`}
+                          value={development.text}
+                          onChange={(e) => {
+                            handleDevelopmentChange(index, 'text', e.target.value);
+                            adjustHeight(e.target);
+                          }}
+                          onInput={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
+                          className={`${multilineInputClass} flex-grow`}
+                        />
+                      </div>
                       <button
                         onClick={() => removeDevelopment(index)}
                         className={`p-2 h-8 flex items-center justify-center ${
@@ -577,7 +591,7 @@ function App() {
                   {canAddDevelopment && (
                     <button
                       onClick={addDevelopment}
-                      className={`w-full p-2 mt-2 rounded-md text-sm border border-dashed print:hidden
+                      className={`w-full p-2 rounded-md text-sm border border-dashed print:hidden
                         ${isCyberpunk 
                           ? 'border-[#00ff9d] text-[#00ff9d] hover:border-[#00ff9d] hover:text-[#00ff9d]' 
                           : isDarkMode 
@@ -592,103 +606,119 @@ function App() {
               </Section>
 
               <Section
-                title="Positives and Negatives"
+                title="Analysis"
                 isExpanded={expandedSections.analysis}
                 onToggle={() => toggleSection('analysis')}
                 isDarkMode={isDarkMode}
                 isCyberpunk={isCyberpunk}
               >
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <div>
-                    <h4 className={`font-semibold text-sm ${isCyberpunk ? 'neon-text' : 'dark:text-gray-200'} mb-2`}>
-                      Positives
-                    </h4>
-                    <div className="space-y-2">
-                      {formData.positives.filter(p => p.visible).map((point, index) => (
-                        <div key={`positive-${index}`} className="flex items-center gap-2">
-                          <textarea
-                            placeholder={`Positive ${index + 1}`}
-                            value={point.text}
-                            onChange={(e) => {
-                              handlePointChange('positives', index, e.target.value);
-                              adjustHeight(e.target);
-                            }}
-                            onInput={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
-                            className={`${multilineInputClass} flex-grow`}
-                          />
-                          <button
-                            onClick={() => removePoint('positives', index)}
-                            className={`p-2 h-8 flex items-center justify-center ${
-                              isCyberpunk
-                                ? 'text-red-400 hover:text-red-300'
-                                : 'text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300'
-                            } print:hidden flex-shrink-0`}
-                            title="Remove positive"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <h4 className={`font-medium mb-2 ${
+                          isCyberpunk 
+                            ? 'text-[#00ff9d]' 
+                            : isDarkMode 
+                              ? 'text-gray-300' 
+                              : 'text-gray-700'
+                        }`}>
+                          Positives
+                        </h4>
+                        <div className="space-y-2">
+                          {formData.positives.filter(p => p.visible).map((point, index) => (
+                            <div key={`positive-${index}`} className="flex items-center gap-2">
+                              <textarea
+                                placeholder={`Positive ${index + 1}`}
+                                value={point.text}
+                                onChange={(e) => {
+                                  handlePointChange('positives', index, e.target.value);
+                                  adjustHeight(e.target);
+                                }}
+                                onInput={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
+                                className={`${multilineInputClass} flex-grow`}
+                              />
+                              <button
+                                onClick={() => removePoint('positives', index)}
+                                className={`p-2 h-8 flex items-center justify-center ${
+                                  isCyberpunk
+                                    ? 'text-red-400 hover:text-red-300'
+                                    : 'text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300'
+                                } print:hidden flex-shrink-0`}
+                                title="Remove positive"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </div>
+                          ))}
+                          {formData.positives.filter(p => p.visible).length < 5 && (
+                            <button
+                              onClick={() => addPoint('positives')}
+                              className={`w-full p-2 mt-2 rounded-md text-sm border border-dashed print:hidden
+                                ${isCyberpunk 
+                                  ? 'border-[#00ff9d] text-[#00ff9d] hover:border-[#00ff9d] hover:text-[#00ff9d]' 
+                                  : isDarkMode 
+                                    ? 'border-gray-600 text-gray-400 hover:border-gray-500 hover:text-gray-300' 
+                                    : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-600'
+                                }`}
+                            >
+                              + Add Positive
+                            </button>
+                          )}
                         </div>
-                      ))}
-                      {formData.positives.filter(p => p.visible).length < 5 && (
-                        <button
-                          onClick={() => addPoint('positives')}
-                          className={`w-full p-2 mt-2 rounded-md text-sm border border-dashed print:hidden
-                            ${isCyberpunk 
-                              ? 'border-[#00ff9d] text-[#00ff9d] hover:border-[#00ff9d] hover:text-[#00ff9d]' 
-                              : isDarkMode 
-                                ? 'border-gray-600 text-gray-400 hover:border-gray-500 hover:text-gray-300' 
-                                : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-600'
-                            }`}
-                        >
-                          + Add Positive
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className={`font-semibold text-sm ${isCyberpunk ? 'neon-text' : 'dark:text-gray-200'} mb-2`}>
-                      Negatives
-                    </h4>
-                    <div className="space-y-2">
-                      {formData.negatives.filter(p => p.visible).map((point, index) => (
-                        <div key={`negative-${index}`} className="flex items-center gap-2">
-                          <textarea
-                            placeholder={`Negative ${index + 1}`}
-                            value={point.text}
-                            onChange={(e) => {
-                              handlePointChange('negatives', index, e.target.value);
-                              adjustHeight(e.target);
-                            }}
-                            onInput={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
-                            className={`${multilineInputClass} flex-grow`}
-                          />
-                          <button
-                            onClick={() => removePoint('negatives', index)}
-                            className={`p-2 h-8 flex items-center justify-center ${
-                              isCyberpunk
-                                ? 'text-red-400 hover:text-red-300'
-                                : 'text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300'
-                            } print:hidden flex-shrink-0`}
-                            title="Remove negative"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
+                      </div>
+                      <div>
+                        <h4 className={`font-medium mb-2 ${
+                          isCyberpunk 
+                            ? 'text-[#00ff9d]' 
+                            : isDarkMode 
+                              ? 'text-gray-300' 
+                              : 'text-gray-700'
+                        }`}>
+                          Negatives
+                        </h4>
+                        <div className="space-y-2">
+                          {formData.negatives.filter(p => p.visible).map((point, index) => (
+                            <div key={`negative-${index}`} className="flex items-center gap-2">
+                              <textarea
+                                placeholder={`Negative ${index + 1}`}
+                                value={point.text}
+                                onChange={(e) => {
+                                  handlePointChange('negatives', index, e.target.value);
+                                  adjustHeight(e.target);
+                                }}
+                                onInput={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
+                                className={`${multilineInputClass} flex-grow`}
+                              />
+                              <button
+                                onClick={() => removePoint('negatives', index)}
+                                className={`p-2 h-8 flex items-center justify-center ${
+                                  isCyberpunk
+                                    ? 'text-red-400 hover:text-red-300'
+                                    : 'text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300'
+                                } print:hidden flex-shrink-0`}
+                                title="Remove negative"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </div>
+                          ))}
+                          {formData.negatives.filter(p => p.visible).length < 5 && (
+                            <button
+                              onClick={() => addPoint('negatives')}
+                              className={`w-full p-2 mt-2 rounded-md text-sm border border-dashed print:hidden
+                                ${isCyberpunk 
+                                  ? 'border-[#00ff9d] text-[#00ff9d] hover:border-[#00ff9d] hover:text-[#00ff9d]' 
+                                  : isDarkMode 
+                                    ? 'border-gray-600 text-gray-400 hover:border-gray-500 hover:text-gray-300' 
+                                    : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-600'
+                                }`}
+                            >
+                              + Add Negative
+                            </button>
+                          )}
                         </div>
-                      ))}
-                      {formData.negatives.filter(p => p.visible).length < 5 && (
-                        <button
-                          onClick={() => addPoint('negatives')}
-                          className={`w-full p-2 mt-2 rounded-md text-sm border border-dashed print:hidden
-                            ${isCyberpunk 
-                              ? 'border-[#00ff9d] text-[#00ff9d] hover:border-[#00ff9d] hover:text-[#00ff9d]' 
-                              : isDarkMode 
-                                ? 'border-gray-600 text-gray-400 hover:border- border-gray-500 hover:text-gray-300' 
-                                : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-600'
-                            }`}
-                        >
-                          + Add Negative
-                        </button>
-                      )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -697,13 +727,36 @@ function App() {
           </div>
         </div>
 
-        {/* Chat Interface */}
-        <div className={`w-96 border-l ${isCyberpunk ? 'border-[#00ff9d] chat-container' : 'border-gray-700'} flex flex-col print:hidden`}>
-          <div className={`p-4 border-b ${isCyberpunk ? 'border-[#00ff9d] bg-opacity-30' : 'border-gray-700 bg-gray-800'}`}>
+        {/* Semi-transparent overlay for mobile */}
+        {isChatVisible && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+            onClick={() => setIsChatVisible(false)}
+          ></div>
+        )}
+
+        {/* Chat Interface - Modified for responsive design */}
+        <div 
+          className={`
+            ${isChatVisible ? 'fixed right-0 top-0 bottom-0 w-full max-w-[90%] sm:w-80 md:w-96 md:relative' : 'hidden md:flex'} 
+            md:w-96 border-l ${isCyberpunk ? 'border-[#00ff9d] chat-container' : 'border-gray-700'} 
+            flex flex-col print:hidden
+            ${isChatVisible ? 'bg-gray-900 md:bg-transparent z-50 shadow-2xl md:shadow-none' : ''}
+            transition-all duration-300 ease-in-out h-full
+          `}
+        >
+          <div className={`p-4 border-b ${isCyberpunk ? 'border-[#00ff9d] bg-opacity-30' : 'border-gray-700 bg-gray-800'} flex justify-between items-center`}>
             <div className="flex items-center gap-2">
               <Bot className={`h-5 w-5 ${isCyberpunk ? 'text-[#00ff9d]' : 'text-blue-400'}`} />
               <h3 className={`text-lg font-semibold ${isCyberpunk ? 'neon-text' : 'text-white'}`}>Analysis Assistant</h3>
             </div>
+            {/* Close button for mobile */}
+            <button 
+              onClick={() => setIsChatVisible(false)}
+              className="md:hidden"
+            >
+              <X className={`h-5 w-5 ${isCyberpunk ? 'text-[#00ff9d]' : 'text-gray-300'}`} />
+            </button>
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.map((message) => (
@@ -770,6 +823,22 @@ function App() {
             </div>
           </form>
         </div>
+        
+        {/* Floating chat button for mobile - appears when chat is hidden */}
+        {!isChatVisible && (
+          <button
+            onClick={() => setIsChatVisible(true)}
+            className={`fixed bottom-4 right-4 p-4 rounded-full shadow-lg md:hidden z-10 ${
+              isCyberpunk
+                ? 'bg-[#00ff9d] bg-opacity-20 text-[#00ff9d] hover:bg-opacity-30 neon-border'
+                : isDarkMode
+                  ? 'bg-gray-800 text-white hover:bg-gray-700'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
+          >
+            <Bot className="h-6 w-6" />
+          </button>
+        )}
       </div>
     </div>
   );
