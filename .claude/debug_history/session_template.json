@@ -1,0 +1,28 @@
+{
+  "id": "unique-session-id",
+  "timestamp": "ISO date string",
+  "component": "ComponentName",
+  "error": {
+    "message": "Error message",
+    "type": "Error type (e.g., TypeError, SyntaxError)",
+    "stack": "Stack trace if available",
+    "context": "Code context where the error occurred"
+  },
+  "investigation_steps": [
+    {
+      "step": "Description of investigation step",
+      "findings": "What was discovered"
+    }
+  ],
+  "solution": {
+    "description": "Description of the solution",
+    "code_changes": "Description or diff of code changes made",
+    "verification": "How the fix was verified"
+  },
+  "lessons_learned": [
+    "Insight or lesson learned from this debugging session"
+  ],
+  "related_issues": [
+    "References to related debugging sessions"
+  ]
+} 

@@ -1,0 +1,31 @@
+{
+  "components": {
+    "App": {
+      "children": ["Section"],
+      "imports": [
+        {
+          "module": "react",
+          "elements": ["useState", "useEffect", "useRef"]
+        },
+        {
+          "module": "lucide-react",
+          "elements": ["Sun", "Moon", "ChevronUp", "ChevronDown", "X", "Search", "Printer", "Send", "Bot", "ThumbsUp", "ThumbsDown", "Cpu", "Plus", "LinkIcon", "Minus"]
+        },
+        {
+          "module": "react-tooltip",
+          "elements": ["Tooltip"]
+        }
+      ],
+      "hooks": [
+        "useState",
+        "useEffect",
+        "useRef"
+      ]
+    },
+    "Section": {
+      "children": [],
+      "imports": [],
+      "hooks": []
+    }
+  }
+} 

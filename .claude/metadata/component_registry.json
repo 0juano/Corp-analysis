@@ -1,0 +1,41 @@
+{
+  "components": [
+    {
+      "name": "App",
+      "file_path": "src/App.tsx",
+      "description": "Main application component for the Corp-analyst application. Handles overall UI structure, state management, and user interactions.",
+      "props_interface": "None (no props as it's the root component)",
+      "state_interfaces": [
+        "isDarkMode: boolean",
+        "isCyberpunk: boolean",
+        "isin: string",
+        "companyName: string",
+        "isSearching: boolean",
+        "messages: Message[]",
+        "currentMessage: string",
+        "isChatLoading: boolean",
+        "sources: Source[]",
+        "showSourceInput: boolean",
+        "newSourceUrl: string",
+        "linkPreviews: Record<string, LinkPreview>",
+        "expandedSections: Record<string, boolean>"
+      ],
+      "key_dependencies": [
+        "react",
+        "lucide-react",
+        "react-tooltip"
+      ]
+    },
+    {
+      "name": "Section",
+      "file_path": "src/App.tsx",
+      "description": "Helper component for collapsible sections in the UI.",
+      "props_interface": "SectionProps (title, children, isExpanded, onToggle, isDarkMode, isCyberpunk)",
+      "state_interfaces": [],
+      "key_dependencies": [
+        "react",
+        "lucide-react"
+      ]
+    }
+  ]
+} 

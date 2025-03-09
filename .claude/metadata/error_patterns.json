@@ -1,0 +1,74 @@
+{
+  "error_patterns": [
+    {
+      "pattern": "Cannot read property '.*' of (undefined|null)",
+      "category": "Runtime",
+      "root_cause": "Accessing properties on undefined or null objects",
+      "solution": "Use optional chaining (?.) or nullish coalescing (??) operators, or add conditional checks before accessing properties",
+      "prevention": "Always validate object existence before accessing properties, especially for API responses or state that might be initialized later"
+    },
+    {
+      "pattern": "Warning: Cannot update a component while rendering a different component",
+      "category": "React State",
+      "root_cause": "State updates in one component triggered during the render phase of another component",
+      "solution": "Move state updates to useEffect or event handlers instead of directly in render functions",
+      "prevention": "Follow React's rules of hooks and avoid state updates during rendering"
+    },
+    {
+      "pattern": "Maximum update depth exceeded",
+      "category": "React Infinite Loop",
+      "root_cause": "State updates in useEffect causing re-renders that trigger the same effect again",
+      "solution": "Add proper dependency arrays to useEffect hooks and ensure state updates don't create infinite loops",
+      "prevention": "Carefully manage dependency arrays in useEffect and use functional updates for setState when new state depends on old state"
+    },
+    {
+      "pattern": "Warning: Each child in a list should have a unique \"key\" prop",
+      "category": "React Rendering",
+      "root_cause": "Rendering arrays of elements without providing unique key props",
+      "solution": "Add a unique key prop to each element in the array, preferably using stable IDs rather than array indices",
+      "prevention": "Always include key props when mapping arrays to React elements"
+    },
+    {
+      "pattern": "Hooks can only be called inside the body of a function component",
+      "category": "React Hooks",
+      "root_cause": "Calling hooks conditionally, in loops, or in regular functions",
+      "solution": "Move hook calls to the top level of function components",
+      "prevention": "Follow React's rules of hooks: only call hooks at the top level of function components"
+    },
+    {
+      "pattern": "TypeError: (.*) is not a function",
+      "category": "Runtime",
+      "root_cause": "Attempting to call a value that is not a function, often due to undefined handlers or incorrect this binding",
+      "solution": "Ensure the function exists before calling it, check for typos in function names, and use proper binding for event handlers",
+      "prevention": "Use TypeScript to catch these errors at compile time, and verify function existence before calling"
+    },
+    {
+      "pattern": "Module not found: Error: Can't resolve '(.*)'",
+      "category": "Build",
+      "root_cause": "Importing a module that doesn't exist or isn't installed",
+      "solution": "Check import paths for typos, install missing dependencies, or correct the import path",
+      "prevention": "Verify imports against the project structure and package.json"
+    },
+    {
+      "pattern": "Warning: React does not recognize the `(.*)` prop on a DOM element",
+      "category": "React Props",
+      "root_cause": "Passing non-standard props directly to DOM elements",
+      "solution": "Use appropriate DOM attributes or extract custom props before passing the rest to DOM elements",
+      "prevention": "Destructure props to separate DOM attributes from custom props"
+    },
+    {
+      "pattern": "Cannot find module '(.*)' or its corresponding type declarations",
+      "category": "TypeScript",
+      "root_cause": "Missing type definitions for imported modules",
+      "solution": "Install @types/package-name or create custom type definitions",
+      "prevention": "Include type definitions when installing packages, or create type declaration files for custom modules"
+    },
+    {
+      "pattern": "Warning: A component is changing (an|a) (uncontrolled|controlled) input to be (controlled|uncontrolled)",
+      "category": "React Forms",
+      "root_cause": "Switching between controlled and uncontrolled inputs during component lifecycle",
+      "solution": "Decide whether inputs should be controlled or uncontrolled and stick with that approach",
+      "prevention": "Initialize state properly for controlled inputs and don't mix approaches"
+    }
+  ]
+} 

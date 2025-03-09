@@ -1,0 +1,61 @@
+{
+  "id": "unique-qa-id",
+  "timestamp": "ISO date string",
+  "component": "ComponentName",
+  "category": "Category (e.g., Bug, Feature, Performance)",
+  "query": {
+    "original_question": "The original question or problem statement",
+    "clarifications": [
+      "Any clarifying questions and answers"
+    ],
+    "context": {
+      "file": "Relevant file path",
+      "lines": "Line numbers if applicable",
+      "code_snippet": "Relevant code snippet"
+    }
+  },
+  "analysis": {
+    "problem_identification": "Analysis of what the problem is",
+    "root_cause": "Identified root cause",
+    "constraints": [
+      "Any constraints or requirements to consider"
+    ],
+    "alternatives_considered": [
+      {
+        "approach": "Alternative approach considered",
+        "pros": [
+          "Advantages of this approach"
+        ],
+        "cons": [
+          "Disadvantages of this approach"
+        ],
+        "reason_rejected": "Why this approach wasn't chosen (if applicable)"
+      }
+    ]
+  },
+  "solution": {
+    "description": "Description of the solution",
+    "code_changes": "Code changes or implementation details",
+    "verification": "How the solution was verified",
+    "limitations": [
+      "Any limitations or caveats to the solution"
+    ]
+  },
+  "reasoning": {
+    "key_insights": [
+      "Key insights that led to the solution"
+    ],
+    "decision_factors": [
+      "Factors that influenced the decision"
+    ],
+    "learning_points": [
+      "What can be learned from this case"
+    ]
+  },
+  "tags": [
+    "Relevant tags for searching and categorization"
+  ],
+  "related_qa_entries": [
+    "References to related Q&A entries"
+  ]
+} 

@@ -1,0 +1,80 @@
+{
+  "id": "unique-delta-id",
+  "timestamp": "ISO date string",
+  "version": {
+    "from": "Previous version",
+    "to": "New version"
+  },
+  "summary": "Brief summary of the changes",
+  "api_changes": [
+    {
+      "component": "Affected component",
+      "type": "Change type (e.g., Breaking, Non-breaking, Deprecation)",
+      "description": "Description of the API change",
+      "migration_path": "How to migrate from the old API to the new one",
+      "code_example": {
+        "before": "Code example before the change",
+        "after": "Code example after the change"
+      }
+    }
+  ],
+  "behavior_changes": [
+    {
+      "component": "Affected component",
+      "description": "Description of the behavior change",
+      "reason": "Reason for the behavior change",
+      "implications": [
+        "Implications of this behavior change"
+      ],
+      "affected_areas": [
+        "Other areas affected by this change"
+      ]
+    }
+  ],
+  "architectural_changes": [
+    {
+      "description": "Description of the architectural change",
+      "reason": "Reason for the architectural change",
+      "benefits": [
+        "Benefits gained from this change"
+      ],
+      "tradeoffs": [
+        "Tradeoffs accepted with this change"
+      ]
+    }
+  ],
+  "performance_impacts": [
+    {
+      "component": "Affected component",
+      "description": "Description of the performance impact",
+      "metrics": {
+        "before": "Performance metrics before the change",
+        "after": "Performance metrics after the change"
+      },
+      "optimization_details": "Details of the optimization or regression"
+    }
+  ],
+  "reasoning": {
+    "decision_factors": [
+      "Factors that influenced the decision to make these changes"
+    ],
+    "alternatives_considered": [
+      {
+        "approach": "Alternative approach considered",
+        "pros": [
+          "Advantages of this approach"
+        ],
+        "cons": [
+          "Disadvantages of this approach"
+        ],
+        "reason_rejected": "Why this approach wasn't chosen"
+      }
+    ],
+    "future_considerations": [
+      "Considerations for future changes building on these changes"
+    ]
+  },
+  "related_changes": [
+    "References to related delta entries"
+  ]
+} 

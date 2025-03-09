@@ -1,0 +1,72 @@
+{
+  "implementation": [
+    {
+      "file": "src/App.tsx",
+      "type": "component",
+      "description": "Main application component implementation"
+    },
+    {
+      "file": "src/main.tsx",
+      "type": "entry",
+      "description": "Application entry point"
+    }
+  ],
+  "interface": [
+    {
+      "file": "src/vite-env.d.ts",
+      "type": "type_definitions",
+      "description": "Vite environment type definitions"
+    }
+  ],
+  "style": [
+    {
+      "file": "src/index.css",
+      "type": "global_styles",
+      "description": "Global styles including Tailwind CSS"
+    }
+  ],
+  "configuration": [
+    {
+      "file": "vite.config.ts",
+      "type": "build_config",
+      "description": "Vite build configuration"
+    },
+    {
+      "file": "tsconfig.json",
+      "type": "typescript_config",
+      "description": "TypeScript configuration"
+    },
+    {
+      "file": "tsconfig.app.json",
+      "type": "typescript_config",
+      "description": "TypeScript app configuration"
+    },
+    {
+      "file": "tsconfig.node.json",
+      "type": "typescript_config",
+      "description": "TypeScript node configuration"
+    },
+    {
+      "file": "tailwind.config.js",
+      "type": "style_config",
+      "description": "Tailwind CSS configuration"
+    },
+    {
+      "file": "postcss.config.js",
+      "type": "style_config",
+      "description": "PostCSS configuration"
+    },
+    {
+      "file": "eslint.config.js",
+      "type": "linting_config",
+      "description": "ESLint configuration"
+    }
+  ],
+  "static": [
+    {
+      "file": "index.html",
+      "type": "html",
+      "description": "Main HTML template"
+    }
+  ]
+} 
