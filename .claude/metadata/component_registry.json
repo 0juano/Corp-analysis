@@ -7,13 +7,12 @@
       "props_interface": "None (no props as it's the root component)",
       "state_interfaces": [
         "isDarkMode: boolean",
-        "isCyberpunk: boolean",
         "isin: string",
         "companyName: string",
+        "ticker: string",
         "isSearching: boolean",
         "messages: Message[]",
         "currentMessage: string",
-        "isChatLoading: boolean",
         "sources: Source[]",
         "showSourceInput: boolean",
         "newSourceUrl: string",
@@ -23,18 +22,34 @@
       "key_dependencies": [
         "react",
         "lucide-react",
-        "react-tooltip"
+        "useSearch"
       ]
     },
     {
       "name": "Section",
       "file_path": "src/App.tsx",
       "description": "Helper component for collapsible sections in the UI.",
-      "props_interface": "SectionProps (title, children, isExpanded, onToggle, isDarkMode, isCyberpunk)",
+      "props_interface": "SectionProps (title, children, isExpanded, onToggle, isDarkMode)",
       "state_interfaces": [],
       "key_dependencies": [
         "react",
         "lucide-react"
+      ]
+    },
+    {
+      "name": "useSearch",
+      "file_path": "src/hooks/useSearch.ts",
+      "description": "Custom hook for handling ISIN search functionality and Yahoo Finance API integration.",
+      "props_interface": "None (hook)",
+      "state_interfaces": [
+        "isin: string",
+        "companyName: string",
+        "ticker: string",
+        "isSearching: boolean",
+        "searchError: string"
+      ],
+      "key_dependencies": [
+        "react"
       ]
     }
   ]

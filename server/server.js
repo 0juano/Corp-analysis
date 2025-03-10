@@ -29,9 +29,10 @@ app.get('/api/yahoo-finance/search', async (req, res) => {
     const response = await axios.get('https://query1.finance.yahoo.com/v1/finance/search', {
       params: {
         q: isin,
-        quotesCount: 1,
+        quotesCount: 5, // Increase quotes count to get more results
         newsCount: 0,
-        listsCount: 0
+        listsCount: 0,
+        enableFuzzyQuery: true // Enable fuzzy matching for better results
       },
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
@@ -39,6 +40,23 @@ app.get('/api/yahoo-finance/search', async (req, res) => {
     });
     
     console.log(`Yahoo Finance response status: ${response.status}`);
+    
+    // Log the response data for debugging
+    console.log('Yahoo Finance response data:', JSON.stringify(response.data, null, 2));
+    
+    // Check if we have quotes in the response
+    if (response.data.quotes && response.data.quotes.length > 0) {
+      console.log(`Found ${response.data.quotes.length} quotes for ISIN ${isin}`);
+      
+      // Log the first quote for debugging
+      const firstQuote = response.data.quotes[0];
+      console.log('First quote:', JSON.stringify(firstQuote, null, 2));
+      
+      // Log available fields in the first quote
+      console.log('Available fields in first quote:', Object.keys(firstQuote));
+    } else {
+      console.log(`No quotes found for ISIN ${isin}`);
+    }
     
     // Return the full response data to the client
     res.json(response.data);
@@ -61,4 +79,4 @@ app.get('/health', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Proxy server running on port ${PORT}`);
-}); 
+});
