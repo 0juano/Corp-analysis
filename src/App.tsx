@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Sun, Moon, ChevronUp, ChevronDown, X, Search, Printer, Send, Bot, Cpu, Plus, Link as LinkIcon } from 'lucide-react';
+import { Sun, Moon, ChevronUp, ChevronDown, X, Search, Printer, Send, Bot } from 'lucide-react';
 import { Tooltip } from 'react-tooltip';
 
 interface Development {
@@ -35,7 +35,6 @@ interface LinkPreview {
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [isCyberpunk, setIsCyberpunk] = useState(false);
   const [isin, setIsin] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -70,6 +69,21 @@ function App() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Adjust textarea heights on mount and when developments change
+  useEffect(() => {
+    if (expandedSections.developments) {
+      adjustAllTextareaHeights('.developments-section textarea');
+    }
+    
+    if (expandedSections.analysis) {
+      adjustAllTextareaHeights('.analysis-section textarea');
+    }
+  }, [
+    expandedSections.developments, 
+    expandedSections.analysis, 
+    formData.developments.filter(d => d.visible).length
+  ]);
 
   const fetchLinkPreview = async (url: string) => {
     try {
@@ -183,6 +197,9 @@ function App() {
       [field]: value
     };
     setFormData(prev => ({ ...prev, developments }));
+    
+    // Adjust heights of all development textareas
+    adjustAllTextareaHeights('.developments-section textarea');
   };
 
   const handlePointChange = (section: 'positives' | 'negatives', index: number, value: string) => {
@@ -213,6 +230,9 @@ function App() {
     const developments = [...formData.developments];
     developments[index] = { ...developments[index], visible: false };
     setFormData(prev => ({ ...prev, developments }));
+    
+    // Adjust heights of all development textareas
+    adjustAllTextareaHeights('.developments-section textarea');
   };
 
   const addDevelopment = () => {
@@ -221,6 +241,9 @@ function App() {
     if (nextIndex !== -1) {
       developments[nextIndex] = { emoji: 'up', text: '', visible: true };
       setFormData(prev => ({ ...prev, developments }));
+      
+      // Adjust heights of all development textareas
+      adjustAllTextareaHeights('.developments-section textarea');
     }
   };
 
@@ -233,43 +256,48 @@ function App() {
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
-    if (isCyberpunk) setIsCyberpunk(false);
-  };
-
-  const toggleCyberpunk = () => {
-    setIsCyberpunk(!isCyberpunk);
-    if (!isCyberpunk) setIsDarkMode(true);
   };
 
   const inputClass = `rounded-md border ${
-    isCyberpunk
-      ? 'bg-black bg-opacity-70 border-[#00ff9d] text-[#00ff9d] focus:ring-[#00ff9d] focus:border-[#00ff9d]'
-      : isDarkMode
-        ? 'bg-gray-800 border-gray-700 text-white focus:ring-blue-500 focus:border-blue-500'
-        : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
-  } focus:outline-none focus:ring-2 w-full`;
+    isDarkMode
+      ? 'bg-gray-800 border-gray-700 text-white focus:ring-blue-500 focus:border-blue-500'
+      : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
+  } focus:outline-none focus:ring-2 w-full px-3 py-2`;
 
   const textareaClass = `${inputClass} min-h-[100px] resize-none w-full`;
   
-  const multilineInputClass = `${inputClass} min-h-[60px] resize-none`;
+  const multilineInputClass = `${inputClass} h-[32px] resize-none overflow-hidden`;
 
   const adjustHeight = (element: HTMLTextAreaElement) => {
+    // Reset height to minimum to accurately calculate the new height
     element.style.height = '32px';
+    // Get the scrollHeight which represents the height needed to fit all content
     const scrollHeight = element.scrollHeight;
+    // If content requires more height than minimum, adjust it
     if (scrollHeight > 32) {
       element.style.height = `${Math.min(scrollHeight, 200)}px`;
     }
+  };
+
+  // Helper function to adjust heights of all textareas in a section
+  const adjustAllTextareaHeights = (selector: string) => {
+    setTimeout(() => {
+      const textareas = document.querySelectorAll(selector);
+      textareas.forEach(textarea => {
+        adjustHeight(textarea as HTMLTextAreaElement);
+      });
+    }, 0);
   };
 
   const visibleDevelopments = formData.developments.filter(d => d.visible);
   const canAddDevelopment = visibleDevelopments.length < 5;
 
   return (
-    <div className={`min-h-screen ${isCyberpunk ? 'cyberpunk' : isDarkMode ? 'dark bg-gray-900' : 'bg-white'}`}>
+    <div className={`min-h-screen ${isDarkMode ? 'dark bg-gray-900' : 'bg-white'}`}>
       <div className="flex flex-col md:flex-row h-screen relative">
         {/* Main Content */}
-        <div className="flex-1 overflow-y-auto pb-0">
-          <div className={`container mx-auto px-4 py-8 max-w-4xl print:px-2 print:py-1 ${isCyberpunk ? 'pt-6' : ''}`}>
+        <div className="flex-1 overflow-y-auto pb-0 flex flex-col items-center">
+          <div className="container mx-auto px-4 py-4 max-w-4xl print:px-2 print:py-1 w-full md:px-8">
             <div className="mb-8 print:mb-2">
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <div className="relative">
@@ -279,17 +307,17 @@ function App() {
                     onChange={(e) => setIsin(e.target.value.toUpperCase())}
                     onKeyDown={handleIsinSubmit}
                     placeholder="Enter ISIN"
-                    className={`${inputClass} py-1 px-2 w-44 text-lg font-mono uppercase ${isCyberpunk ? 'neon-border' : ''}`}
+                    className={`${inputClass} py-1 px-2 w-44 text-lg font-mono uppercase`}
                     maxLength={12}
                   />
                   {isSearching && (
                     <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                      <Search className={`h-5 w-5 ${isCyberpunk ? 'text-[#00ff9d]' : 'text-blue-500'} ${isCyberpunk ? 'glitch' : 'animate-spin'}`} />
+                      <Search className={`h-5 w-5 text-blue-500 animate-spin`} />
                     </div>
                   )}
                 </div>
                 {(isSearching || companyName) && (
-                  <div className={`${isCyberpunk ? 'neon-text' : isDarkMode ? 'text-gray-300' : 'text-gray-700'} flex-grow ${isCyberpunk ? 'glitch' : ''}`}>
+                  <div className={`${isDarkMode ? 'text-gray-300' : 'text-gray-700'} flex-grow`}>
                     {isSearching ? (
                       <span className="animate-pulse text-lg">Searching...</span>
                     ) : (
@@ -301,27 +329,18 @@ function App() {
                   <button
                     onClick={handlePrint}
                     className={`p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 print:hidden ${
-                      isCyberpunk ? 'text-[#00ff9d]' : isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                      isDarkMode ? 'text-gray-300' : 'text-gray-600'
                     }`}
                     title="Print report"
                   >
                     <Printer className="h-5 w-5" />
                   </button>
                   <button
-                    onClick={toggleCyberpunk}
-                    className={`p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 print:hidden ${
-                      isCyberpunk ? 'text-[#00ff9d]' : 'text-purple-500'
-                    }`}
-                    title={isCyberpunk ? "Disable Cyberpunk mode" : "Enable Cyberpunk mode"}
-                  >
-                    <Cpu className={`h-5 w-5 ${isCyberpunk ? 'glitch' : ''}`} />
-                  </button>
-                  <button
                     onClick={toggleDarkMode}
                     className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 print:hidden"
                   >
                     {isDarkMode ? (
-                      <Sun className={`h-5 w-5 ${isCyberpunk ? 'text-[#00ff9d]' : 'text-yellow-500'}`} />
+                      <Sun className="h-5 w-5 text-yellow-500" />
                     ) : (
                       <Moon className="h-5 w-5 text-gray-600" />
                     )}
@@ -330,11 +349,11 @@ function App() {
                   <button
                     onClick={() => setIsChatVisible(!isChatVisible)}
                     className={`p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 print:hidden md:hidden ${
-                      isCyberpunk ? 'text-[#00ff9d]' : isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                      isDarkMode ? 'text-gray-300' : 'text-gray-600'
                     }`}
                     title={isChatVisible ? "Hide chat" : "Show chat"}
                   >
-                    <Bot className={`h-5 w-5 ${isCyberpunk ? 'glitch' : ''}`} />
+                    <Bot className="h-5 w-5" />
                   </button>
                 </div>
               </div>
@@ -345,13 +364,12 @@ function App() {
               )}
             </div>
 
-            <div className={`${isCyberpunk ? 'cyberpunk-sections' : 'space-y-4'} print:space-y-1`}>
+            <div className="space-y-4 print:space-y-1 w-full">
               <Section
                 title="Business Overview"
                 isExpanded={expandedSections.business}
                 onToggle={() => toggleSection('business')}
                 isDarkMode={isDarkMode}
-                isCyberpunk={isCyberpunk}
               >
                 <div className="space-y-2">
                   <textarea
@@ -373,14 +391,11 @@ function App() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className={`text-xs px-2 py-1 rounded-full ${
-                              isCyberpunk
-                                ? 'bg-[#00ff9d] bg-opacity-20 text-[#00ff9d] hover:bg-opacity-30'
-                                : isDarkMode
-                                  ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
-                                  : 'bg-gray-200 text-blue-600 hover:bg-gray-300'
+                              isDarkMode
+                                ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
+                                : 'bg-gray-200 text-blue-600 hover:bg-gray-300'
                             } flex items-center gap-1`}
                           >
-                            <LinkIcon className="h-3 w-3" />
                             <span className="truncate max-w-[100px] sm:max-w-[150px]">
                               {linkPreviews[source.url]?.title || new URL(source.url).hostname}
                             </span>
@@ -388,8 +403,8 @@ function App() {
                           <button
                             onClick={() => handleRemoveSource(source.id)}
                             className={`p-1 rounded-full ${
-                              isCyberpunk
-                                ? 'text-red-400 hover:text-red-300'
+                              isDarkMode
+                                ? 'text-red-500 hover:text-red-700'
                                 : 'text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300'
                             } opacity-0 group-hover:opacity-100 transition-opacity print:hidden`}
                             title="Remove source"
@@ -405,7 +420,7 @@ function App() {
                         <Tooltip
                           id={`source-preview-${source.id}`}
                           place="bottom"
-                          className={`max-w-xs ${isCyberpunk ? 'cyberpunk-tooltip' : ''}`}
+                          className={`max-w-xs`}
                         >
                           {linkPreviews[source.url] ? (
                             <div className="p-2">
@@ -431,11 +446,9 @@ function App() {
                           <button
                             onClick={handleAddSource}
                             className={`px-2 py-1 rounded-md text-xs ${
-                              isCyberpunk
-                                ? 'bg-[#00ff9d] bg-opacity-20 text-[#00ff9d] hover:bg-opacity-30'
-                                : isDarkMode
-                                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                                  : 'bg-blue-500 text-white hover:bg-blue-600'
+                              isDarkMode
+                                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                : 'bg-blue-500 text-white hover:bg-blue-600'
                             }`}
                           >
                             Add
@@ -446,11 +459,9 @@ function App() {
                               setNewSourceUrl('');
                             }}
                             className={`px-2 py-1 rounded-md text-xs ${
-                              isCyberpunk
-                                ? 'bg-red-500 bg-opacity-20 text-red-400 hover:bg-opacity-30'
-                                : isDarkMode
-                                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                                  : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                              isDarkMode
+                                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
                             }`}
                           >
                             Cancel
@@ -461,15 +472,12 @@ function App() {
                       <button
                         onClick={() => setShowSourceInput(true)}
                         className={`text-xs px-2 py-1 rounded-full ${
-                          isCyberpunk
-                            ? 'bg-[#00ff9d] bg-opacity-20 text-[#00ff9d] hover:bg-opacity-30'
-                            : isDarkMode
-                              ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
-                              : 'bg-gray-200 text-blue-600 hover:bg-gray-300'
+                          isDarkMode
+                            ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
+                            : 'bg-gray-200 text-blue-600 hover:bg-gray-300'
                         } flex items-center gap-1 print:hidden`}
                       >
-                        <Plus className="h-3 w-3" />
-                        <span>Add Source</span>
+                        + Add Source
                       </button>
                     )}
                   </div>
@@ -481,7 +489,6 @@ function App() {
                 isExpanded={expandedSections.ownership}
                 onToggle={() => toggleSection('ownership')}
                 isDarkMode={isDarkMode}
-                isCyberpunk={isCyberpunk}
               >
                 <textarea
                   placeholder="Enter ownership and management details..."
@@ -500,7 +507,6 @@ function App() {
                 isExpanded={expandedSections.industry}
                 onToggle={() => toggleSection('industry')}
                 isDarkMode={isDarkMode}
-                isCyberpunk={isCyberpunk}
               >
                 <textarea
                   placeholder="Enter industry and competition analysis..."
@@ -519,7 +525,6 @@ function App() {
                 isExpanded={expandedSections.earnings}
                 onToggle={() => toggleSection('earnings')}
                 isDarkMode={isDarkMode}
-                isCyberpunk={isCyberpunk}
               >
                 <textarea
                   placeholder="Enter earnings and financial details..."
@@ -538,9 +543,8 @@ function App() {
                 isExpanded={expandedSections.developments}
                 onToggle={() => toggleSection('developments')}
                 isDarkMode={isDarkMode}
-                isCyberpunk={isCyberpunk}
               >
-                <div className="space-y-3">
+                <div className="space-y-3 developments-section">
                   {formData.developments.filter(d => d.visible).map((development, index) => (
                     <div key={`development-${index}`} className="flex items-start gap-2">
                       <div className="flex-shrink-0 mt-2">
@@ -548,12 +552,8 @@ function App() {
                           onClick={() => handleDevelopmentChange(index, 'emoji', development.emoji === 'up' ? 'down' : 'up')}
                           className={`p-1 rounded-md ${
                             development.emoji === 'up'
-                              ? isCyberpunk
-                                ? 'text-[#00ff9d]'
-                                : 'text-green-500 dark:text-green-400'
-                              : isCyberpunk
-                                ? 'text-red-400'
-                                : 'text-red-500 dark:text-red-400'
+                              ? 'text-green-500 dark:text-green-400'
+                              : 'text-red-500 dark:text-red-400'
                           }`}
                         >
                           {development.emoji === 'up' ? (
@@ -571,6 +571,7 @@ function App() {
                             handleDevelopmentChange(index, 'text', e.target.value);
                             adjustHeight(e.target);
                           }}
+                          onFocus={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
                           onInput={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
                           className={`${multilineInputClass} flex-grow`}
                         />
@@ -578,8 +579,8 @@ function App() {
                       <button
                         onClick={() => removeDevelopment(index)}
                         className={`p-2 h-8 flex items-center justify-center ${
-                          isCyberpunk
-                            ? 'text-red-400 hover:text-red-300'
+                          isDarkMode
+                            ? 'text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300'
                             : 'text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300'
                         } print:hidden flex-shrink-0`}
                         title="Remove development"
@@ -592,11 +593,9 @@ function App() {
                     <button
                       onClick={addDevelopment}
                       className={`w-full p-2 rounded-md text-sm border border-dashed print:hidden
-                        ${isCyberpunk 
-                          ? 'border-[#00ff9d] text-[#00ff9d] hover:border-[#00ff9d] hover:text-[#00ff9d]' 
-                          : isDarkMode 
-                            ? 'border-gray-600 text-gray-400 hover:border-gray-500 hover:text-gray-300' 
-                            : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-600'
+                        ${isDarkMode 
+                          ? 'border-gray-600 text-gray-400 hover:border-gray-500 hover:text-gray-300' 
+                          : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-600'
                         }`}
                     >
                       + Add Development
@@ -610,18 +609,13 @@ function App() {
                 isExpanded={expandedSections.analysis}
                 onToggle={() => toggleSection('analysis')}
                 isDarkMode={isDarkMode}
-                isCyberpunk={isCyberpunk}
               >
-                <div className="space-y-4">
+                <div className="space-y-4 analysis-section">
                   <div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <h4 className={`font-medium mb-2 ${
-                          isCyberpunk 
-                            ? 'text-[#00ff9d]' 
-                            : isDarkMode 
-                              ? 'text-gray-300' 
-                              : 'text-gray-700'
+                          isDarkMode ? 'text-gray-300' : 'text-gray-700'
                         }`}>
                           Positives
                         </h4>
@@ -635,14 +629,15 @@ function App() {
                                   handlePointChange('positives', index, e.target.value);
                                   adjustHeight(e.target);
                                 }}
+                                onFocus={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
                                 onInput={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
                                 className={`${multilineInputClass} flex-grow`}
                               />
                               <button
                                 onClick={() => removePoint('positives', index)}
                                 className={`p-2 h-8 flex items-center justify-center ${
-                                  isCyberpunk
-                                    ? 'text-red-400 hover:text-red-300'
+                                  isDarkMode
+                                    ? 'text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300'
                                     : 'text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300'
                                 } print:hidden flex-shrink-0`}
                                 title="Remove positive"
@@ -655,11 +650,9 @@ function App() {
                             <button
                               onClick={() => addPoint('positives')}
                               className={`w-full p-2 mt-2 rounded-md text-sm border border-dashed print:hidden
-                                ${isCyberpunk 
-                                  ? 'border-[#00ff9d] text-[#00ff9d] hover:border-[#00ff9d] hover:text-[#00ff9d]' 
-                                  : isDarkMode 
-                                    ? 'border-gray-600 text-gray-400 hover:border-gray-500 hover:text-gray-300' 
-                                    : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-600'
+                                ${isDarkMode 
+                                  ? 'border-gray-600 text-gray-400 hover:border-gray-500 hover:text-gray-300' 
+                                  : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-600'
                                 }`}
                             >
                               + Add Positive
@@ -669,11 +662,7 @@ function App() {
                       </div>
                       <div>
                         <h4 className={`font-medium mb-2 ${
-                          isCyberpunk 
-                            ? 'text-[#00ff9d]' 
-                            : isDarkMode 
-                              ? 'text-gray-300' 
-                              : 'text-gray-700'
+                          isDarkMode ? 'text-gray-300' : 'text-gray-700'
                         }`}>
                           Negatives
                         </h4>
@@ -687,14 +676,15 @@ function App() {
                                   handlePointChange('negatives', index, e.target.value);
                                   adjustHeight(e.target);
                                 }}
+                                onFocus={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
                                 onInput={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
                                 className={`${multilineInputClass} flex-grow`}
                               />
                               <button
                                 onClick={() => removePoint('negatives', index)}
                                 className={`p-2 h-8 flex items-center justify-center ${
-                                  isCyberpunk
-                                    ? 'text-red-400 hover:text-red-300'
+                                  isDarkMode
+                                    ? 'text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300'
                                     : 'text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300'
                                 } print:hidden flex-shrink-0`}
                                 title="Remove negative"
@@ -707,11 +697,9 @@ function App() {
                             <button
                               onClick={() => addPoint('negatives')}
                               className={`w-full p-2 mt-2 rounded-md text-sm border border-dashed print:hidden
-                                ${isCyberpunk 
-                                  ? 'border-[#00ff9d] text-[#00ff9d] hover:border-[#00ff9d] hover:text-[#00ff9d]' 
-                                  : isDarkMode 
-                                    ? 'border-gray-600 text-gray-400 hover:border-gray-500 hover:text-gray-300' 
-                                    : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-600'
+                                ${isDarkMode 
+                                  ? 'border-gray-600 text-gray-400 hover:border-gray-500 hover:text-gray-300' 
+                                  : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-600'
                                 }`}
                             >
                               + Add Negative
@@ -739,23 +727,23 @@ function App() {
         <div 
           className={`
             ${isChatVisible ? 'fixed right-0 top-0 bottom-0 w-full max-w-[90%] sm:w-80 md:w-96 md:relative' : 'hidden md:flex'} 
-            md:w-96 border-l ${isCyberpunk ? 'border-[#00ff9d] chat-container' : 'border-gray-700'} 
+            md:w-96 border-l ${isDarkMode ? 'border-gray-700' : 'border-gray-700'} 
             flex flex-col print:hidden
             ${isChatVisible ? 'bg-gray-900 md:bg-transparent z-50 shadow-2xl md:shadow-none' : ''}
             transition-all duration-300 ease-in-out h-full
           `}
         >
-          <div className={`p-4 border-b ${isCyberpunk ? 'border-[#00ff9d] bg-opacity-30' : 'border-gray-700 bg-gray-800'} flex justify-between items-center`}>
+          <div className={`p-4 border-b ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-700 bg-gray-800'} flex justify-between items-center`}>
             <div className="flex items-center gap-2">
-              <Bot className={`h-5 w-5 ${isCyberpunk ? 'text-[#00ff9d]' : 'text-blue-400'}`} />
-              <h3 className={`text-lg font-semibold ${isCyberpunk ? 'neon-text' : 'text-white'}`}>Analysis Assistant</h3>
+              <Bot className={`h-5 w-5 ${isDarkMode ? 'text-gray-300' : 'text-blue-400'}`} />
+              <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-gray-300' : 'text-white'}`}>Analysis Assistant</h3>
             </div>
             {/* Close button for mobile */}
             <button 
               onClick={() => setIsChatVisible(false)}
               className="md:hidden"
             >
-              <X className={`h-5 w-5 ${isCyberpunk ? 'text-[#00ff9d]' : 'text-gray-300'}`} />
+              <X className={`h-5 w-5 ${isDarkMode ? 'text-gray-300' : 'text-gray-300'}`} />
             </button>
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -767,11 +755,11 @@ function App() {
                 <div
                   className={`max-w-[80%] rounded-lg p-3 ${
                     message.sender === 'user'
-                      ? isCyberpunk
-                        ? 'bg-[#00ff9d] bg-opacity-20 text-[#00ff9d] neon-border'
+                      ? isDarkMode
+                        ? 'bg-gray-700 text-gray-100'
                         : 'bg-blue-600 text-white'
-                      : isCyberpunk
-                        ? 'chat-message text-[#00ff9d]'
+                      : isDarkMode
+                        ? 'chat-message text-gray-100'
                         : 'bg-gray-700 text-gray-100'
                   }`}
                 >
@@ -782,21 +770,21 @@ function App() {
             {isChatLoading && (
               <div className="flex justify-start">
                 <div className={`max-w-[80%] rounded-lg p-3 ${
-                  isCyberpunk
-                    ? 'chat-message text-[#00ff9d]'
+                  isDarkMode
+                    ? 'chat-message text-gray-100'
                     : 'bg-gray-700 text-gray-100'
                 }`}>
                   <div className="flex gap-1">
-                    <div className={`w-2 h-2 ${isCyberpunk ? 'bg-[#00ff9d]' : 'bg-gray-400'} rounded-full animate-bounce`}></div>
-                    <div className={`w-2 h-2 ${isCyberpunk ? 'bg-[#00ff9d]' : 'bg-gray-400'} rounded-full animate-bounce [animation-delay:0.2s]`}></div>
-                    <div className={`w-2 h-2 ${isCyberpunk ? 'bg-[#00ff9d]' : 'bg-gray-400'} rounded-full animate-bounce [animation-delay:0.4s]`}></div>
+                    <div className={`w-2 h-2 ${isDarkMode ? 'bg-gray-400' : 'bg-gray-400'} rounded-full animate-bounce`}></div>
+                    <div className={`w-2 h-2 ${isDarkMode ? 'bg-gray-400' : 'bg-gray-400'} rounded-full animate-bounce [animation-delay:0.2s]`}></div>
+                    <div className={`w-2 h-2 ${isDarkMode ? 'bg-gray-400' : 'bg-gray-400'} rounded-full animate-bounce [animation-delay:0.4s]`}></div>
                   </div>
                 </div>
               </div>
             )}
             <div ref={chatEndRef} />
           </div>
-          <form onSubmit={handleSendMessage} className={`p-4 border-t ${isCyberpunk ? 'border-[#00ff9d] bg-opacity-30' : 'border-gray-700 bg-gray-800'}`}>
+          <form onSubmit={handleSendMessage} className={`p-4 border-t ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-700 bg-gray-800'}`}>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -804,16 +792,16 @@ function App() {
                 onChange={(e) => setCurrentMessage(e.target.value)}
                 placeholder="Ask for help analyzing..."
                 className={`flex-1 rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${
-                  isCyberpunk
-                    ? 'bg-opacity-10 text-[#00ff9d] placeholder-[#00ff9d] placeholder-opacity-50 focus:ring-[#00ff9d]'
+                  isDarkMode
+                    ? 'bg-gray-700 text-white placeholder-gray-400 focus:ring-blue-500'
                     : 'bg-gray-700 text-white placeholder-gray-400 focus:ring-blue-500'
                 }`}
               />
               <button
                 type="submit"
                 className={`p-2 rounded-md focus:outline-none focus:ring-2 ${
-                  isCyberpunk
-                    ? 'bg-[#00ff9d] bg-opacity-20 text-[#00ff9d] hover:bg-opacity-30 focus:ring-[#00ff9d]'
+                  isDarkMode
+                    ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
                     : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
                 }`}
                 disabled={!currentMessage.trim()}
@@ -829,11 +817,9 @@ function App() {
           <button
             onClick={() => setIsChatVisible(true)}
             className={`fixed bottom-4 right-4 p-4 rounded-full shadow-lg md:hidden z-10 ${
-              isCyberpunk
-                ? 'bg-[#00ff9d] bg-opacity-20 text-[#00ff9d] hover:bg-opacity-30 neon-border'
-                : isDarkMode
-                  ? 'bg-gray-800 text-white hover:bg-gray-700'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
+              isDarkMode
+                ? 'bg-gray-800 text-white hover:bg-gray-700'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
             }`}
           >
             <Bot className="h-6 w-6" />
@@ -850,49 +836,32 @@ interface SectionProps {
   isExpanded: boolean;
   onToggle: () => void;
   isDarkMode: boolean;
-  isCyberpunk: boolean;
 }
 
-function Section({ title, children, isExpanded, onToggle, isDarkMode, isCyberpunk }: SectionProps) {
+function Section({ title, children, isExpanded, onToggle, isDarkMode }: SectionProps) {
   return (
     <div className={`border rounded-lg ${
-      isCyberpunk 
-        ? 'section-card' 
-        : isDarkMode 
-          ? 'border-gray-700 bg-gray-800' 
-          : 'border-gray-200 bg-white'
+      isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'
     }`}>
       <button
         onClick={onToggle}
-        className={`w-full px-4 py-3 flex justify-between items-center ${isCyberpunk ? 'py-4' : ''}`}
+        className={`w-full px-4 py-3 flex justify-between items-center ${isDarkMode ? 'py-4' : ''}`}
       >
         <h2 className={`font-semibold ${
-          isCyberpunk 
-            ? 'neon-text' 
-            : isDarkMode 
-              ? 'text-white' 
-              : 'text-gray-900'
+          isDarkMode ? 'text-white' : 'text-gray-900'
         }`}>{title}</h2>
         {isExpanded ? (
           <ChevronUp className={`h-5 w-5 ${
-            isCyberpunk 
-              ? 'text-[#00ff9d]' 
-              : isDarkMode 
-                ? 'text-gray-400' 
-                : 'text-gray-500'
+            isDarkMode ? 'text-gray-400' : 'text-gray-500'
           } print:hidden`} />
         ) : (
           <ChevronDown className={`h-5 w-5 ${
-            isCyberpunk 
-              ? 'text-[#00ff9d]' 
-              : isDarkMode 
-                ? 'text-gray-400' 
-                : 'text-gray-500'
+            isDarkMode ? 'text-gray-400' : 'text-gray-500'
           } print:hidden`} />
         )}
       </button>
       {isExpanded && (
-        <div className={`px-4 ${isCyberpunk ? 'pb-5 pt-2' : 'pb-4'} print:px-2 print:py-1`}>
+        <div className={`px-4 ${isDarkMode ? 'pb-5 pt-2' : 'pb-4'} print:px-2 print:py-1`}>
           {children}
         </div>
       )}

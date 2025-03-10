@@ -38,7 +38,7 @@ function Section({ title, children, isExpanded, onToggle, isDarkMode, isCyberpun
         {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
       </div>
       {isExpanded && (
-        <div className="p-4">
+        <div className="p-5">
           {children}
         </div>
       )}
