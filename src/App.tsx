@@ -289,8 +289,8 @@ function App() {
 
   const inputClass = `rounded-md border ${
     isDarkMode
-      ? 'bg-gray-800 border-gray-700 text-white focus:ring-blue-500 focus:border-blue-500'
-      : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
+      ? 'bg-gray-900 border-gray-600 text-gray-100 focus:ring-blue-600 focus:border-blue-600 placeholder-gray-400'
+      : 'bg-white border-gray-400 text-gray-900 focus:ring-blue-600 focus:border-blue-600 placeholder-gray-500'
   } focus:outline-none focus:ring-2 w-full px-3 py-2`;
 
   const textareaClass = `${inputClass} min-h-[100px] resize-none w-full`;
@@ -417,10 +417,10 @@ function App() {
                   <div className="flex flex-wrap gap-2 items-center mt-2">
                     <button
                       onClick={() => setShowSourceInput('business')}
-                      className={`text-xs px-2 py-1 rounded-full ${
+                      className={`text-xs px-3 py-1.5 rounded-full transition-all duration-200 ${
                         isDarkMode
-                          ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
-                          : 'bg-gray-200 text-blue-600 hover:bg-gray-300'
+                          ? 'bg-gray-800 text-blue-400 hover:bg-gray-700 hover:text-blue-300 shadow-sm shadow-blue-900/20'
+                          : 'bg-gray-200 text-blue-600 hover:bg-gray-300 hover:text-blue-700 shadow-sm'
                       } flex items-center justify-center print:hidden`}
                     >
                       <span className="flex items-center justify-center w-4 h-4 rounded-full border border-current">+</span>
@@ -496,10 +496,10 @@ function App() {
                           value={newSourceUrl}
                           onChange={(e) => setNewSourceUrl(e.target.value)}
                           placeholder="Enter URL"
-                          className={`text-xs py-1 px-2 rounded-md border ${
+                          className={`text-xs py-1.5 px-3 rounded-md border ${
                             isDarkMode
-                              ? 'bg-gray-800 border-gray-700 text-white focus:ring-blue-500 focus:border-blue-500'
-                              : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
+                              ? 'bg-gray-900 border-gray-600 text-gray-100 focus:ring-blue-600 focus:border-blue-600 placeholder-gray-400'
+                              : 'bg-white border-gray-400 text-gray-900 focus:ring-blue-600 focus:border-blue-600 placeholder-gray-500'
                           } focus:outline-none focus:ring-2 w-full sm:w-auto text-[11px]`}
                         />
                         <div className="flex gap-1 mt-1 sm:mt-0">
@@ -554,10 +554,10 @@ function App() {
                 <div className="flex flex-wrap gap-2 items-center mt-2">
                   <button
                     onClick={() => setShowSourceInput('ownership')}
-                    className={`text-xs px-2 py-1 rounded-full ${
+                    className={`text-xs px-3 py-1.5 rounded-full transition-all duration-200 ${
                       isDarkMode
-                        ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
-                        : 'bg-gray-200 text-blue-600 hover:bg-gray-300'
+                        ? 'bg-gray-800 text-blue-400 hover:bg-gray-700 hover:text-blue-300 shadow-sm shadow-blue-900/20'
+                        : 'bg-gray-200 text-blue-600 hover:bg-gray-300 hover:text-blue-700 shadow-sm'
                     } flex items-center justify-center print:hidden`}
                   >
                     <span className="flex items-center justify-center w-4 h-4 rounded-full border border-current">+</span>
@@ -633,10 +633,10 @@ function App() {
                         value={newSourceUrl}
                         onChange={(e) => setNewSourceUrl(e.target.value)}
                         placeholder="Enter URL"
-                        className={`text-xs py-1 px-2 rounded-md border ${
+                        className={`text-xs py-1.5 px-3 rounded-md border ${
                           isDarkMode
-                            ? 'bg-gray-800 border-gray-700 text-white focus:ring-blue-500 focus:border-blue-500'
-                            : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
+                            ? 'bg-gray-900 border-gray-600 text-gray-100 focus:ring-blue-600 focus:border-blue-600 placeholder-gray-400'
+                            : 'bg-white border-gray-400 text-gray-900 focus:ring-blue-600 focus:border-blue-600 placeholder-gray-500'
                         } focus:outline-none focus:ring-2 w-full sm:w-auto text-[11px]`}
                       />
                       <div className="flex gap-1 mt-1 sm:mt-0">
@@ -690,10 +690,10 @@ function App() {
                 <div className="flex flex-wrap gap-2 items-center mt-2">
                   <button
                     onClick={() => setShowSourceInput('industry')}
-                    className={`text-xs px-2 py-1 rounded-full ${
+                    className={`text-xs px-3 py-1.5 rounded-full transition-all duration-200 ${
                       isDarkMode
-                        ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
-                        : 'bg-gray-200 text-blue-600 hover:bg-gray-300'
+                        ? 'bg-gray-800 text-blue-400 hover:bg-gray-700 hover:text-blue-300 shadow-sm shadow-blue-900/20'
+                        : 'bg-gray-200 text-blue-600 hover:bg-gray-300 hover:text-blue-700 shadow-sm'
                     } flex items-center justify-center print:hidden`}
                   >
                     <span className="flex items-center justify-center w-4 h-4 rounded-full border border-current">+</span>
@@ -769,10 +769,10 @@ function App() {
                         value={newSourceUrl}
                         onChange={(e) => setNewSourceUrl(e.target.value)}
                         placeholder="Enter URL"
-                        className={`text-xs py-1 px-2 rounded-md border ${
+                        className={`text-xs py-1.5 px-3 rounded-md border ${
                           isDarkMode
-                            ? 'bg-gray-800 border-gray-700 text-white focus:ring-blue-500 focus:border-blue-500'
-                            : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
+                            ? 'bg-gray-900 border-gray-600 text-gray-100 focus:ring-blue-600 focus:border-blue-600 placeholder-gray-400'
+                            : 'bg-white border-gray-400 text-gray-900 focus:ring-blue-600 focus:border-blue-600 placeholder-gray-500'
                         } focus:outline-none focus:ring-2 w-full sm:w-auto text-[11px]`}
                       />
                       <div className="flex gap-1 mt-1 sm:mt-0">
@@ -826,10 +826,10 @@ function App() {
                 <div className="flex flex-wrap gap-2 items-center mt-2">
                   <button
                     onClick={() => setShowSourceInput('earnings')}
-                    className={`text-xs px-2 py-1 rounded-full ${
+                    className={`text-xs px-3 py-1.5 rounded-full transition-all duration-200 ${
                       isDarkMode
-                        ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
-                        : 'bg-gray-200 text-blue-600 hover:bg-gray-300'
+                        ? 'bg-gray-800 text-blue-400 hover:bg-gray-700 hover:text-blue-300 shadow-sm shadow-blue-900/20'
+                        : 'bg-gray-200 text-blue-600 hover:bg-gray-300 hover:text-blue-700 shadow-sm'
                     } flex items-center justify-center print:hidden`}
                   >
                     <span className="flex items-center justify-center w-4 h-4 rounded-full border border-current">+</span>
@@ -905,10 +905,10 @@ function App() {
                         value={newSourceUrl}
                         onChange={(e) => setNewSourceUrl(e.target.value)}
                         placeholder="Enter URL"
-                        className={`text-xs py-1 px-2 rounded-md border ${
+                        className={`text-xs py-1.5 px-3 rounded-md border ${
                           isDarkMode
-                            ? 'bg-gray-800 border-gray-700 text-white focus:ring-blue-500 focus:border-blue-500'
-                            : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
+                            ? 'bg-gray-900 border-gray-600 text-gray-100 focus:ring-blue-600 focus:border-blue-600 placeholder-gray-400'
+                            : 'bg-white border-gray-400 text-gray-900 focus:ring-blue-600 focus:border-blue-600 placeholder-gray-500'
                         } focus:outline-none focus:ring-2 w-full sm:w-auto text-[11px]`}
                       />
                       <div className="flex gap-1 mt-1 sm:mt-0">
@@ -1013,10 +1013,10 @@ function App() {
                   <div className="flex flex-wrap gap-2 items-center mt-4">
                     <button
                       onClick={() => setShowSourceInput('developments')}
-                      className={`text-xs px-2 py-1 rounded-full ${
+                      className={`text-xs px-3 py-1.5 rounded-full transition-all duration-200 ${
                         isDarkMode
-                          ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
-                          : 'bg-gray-200 text-blue-600 hover:bg-gray-300'
+                          ? 'bg-gray-800 text-blue-400 hover:bg-gray-700 hover:text-blue-300 shadow-sm shadow-blue-900/20'
+                          : 'bg-gray-200 text-blue-600 hover:bg-gray-300 hover:text-blue-700 shadow-sm'
                       } flex items-center justify-center print:hidden`}
                     >
                       <span className="flex items-center justify-center w-4 h-4 rounded-full border border-current">+</span>
@@ -1092,10 +1092,10 @@ function App() {
                           value={newSourceUrl}
                           onChange={(e) => setNewSourceUrl(e.target.value)}
                           placeholder="Enter URL"
-                          className={`text-xs py-1 px-2 rounded-md border ${
+                          className={`text-xs py-1.5 px-3 rounded-md border ${
                             isDarkMode
-                              ? 'bg-gray-800 border-gray-700 text-white focus:ring-blue-500 focus:border-blue-500'
-                              : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
+                              ? 'bg-gray-900 border-gray-600 text-gray-100 focus:ring-blue-600 focus:border-blue-600 placeholder-gray-400'
+                              : 'bg-white border-gray-400 text-gray-900 focus:ring-blue-600 focus:border-blue-600 placeholder-gray-500'
                           } focus:outline-none focus:ring-2 w-full sm:w-auto text-[11px]`}
                         />
                         <div className="flex gap-1 mt-1 sm:mt-0">
@@ -1361,28 +1361,29 @@ interface SectionProps {
 
 function Section({ title, children, isExpanded, onToggle, isDarkMode }: SectionProps) {
   return (
-    <div className={`border rounded-lg ${
-      isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'
-    }`}>
-      <button
+    <div className={`mb-8 rounded-xl overflow-hidden transition-all duration-200 ${
+      isDarkMode 
+        ? 'bg-gray-900 text-gray-100 border border-gray-700 shadow-md shadow-gray-950/50' 
+        : 'bg-white text-gray-900 border border-gray-300 shadow-md shadow-gray-200/70'
+    } hover:shadow-lg transform hover:-translate-y-0.5 transition-all`}>
+      <div 
+        className={`flex justify-between items-center p-5 cursor-pointer ${
+          isDarkMode 
+            ? 'bg-gradient-to-r from-gray-800 to-gray-900 text-white border-b border-gray-700' 
+            : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-900 border-b border-gray-300'
+        }`}
         onClick={onToggle}
-        className={`w-full px-4 py-3 flex justify-between items-center ${isDarkMode ? 'py-4' : ''}`}
       >
-        <h2 className={`font-semibold ${
-          isDarkMode ? 'text-white' : 'text-gray-900'
-        }`}>{title}</h2>
-        {isExpanded ? (
-          <ChevronUp className={`h-5 w-5 ${
-            isDarkMode ? 'text-gray-400' : 'text-gray-500'
-          } print:hidden`} />
-        ) : (
-          <ChevronDown className={`h-5 w-5 ${
-            isDarkMode ? 'text-gray-400' : 'text-gray-500'
-          } print:hidden`} />
-        )}
-      </button>
+        <h2 className="text-lg font-semibold tracking-wide">{title}</h2>
+        <div className="bg-opacity-20 p-1.5 rounded-full transition-colors duration-200 hover:bg-white hover:bg-opacity-10">
+          {isExpanded ? 
+            <ChevronUp size={20} className={`${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`} /> : 
+            <ChevronDown size={20} className={`${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`} />
+          }
+        </div>
+      </div>
       {isExpanded && (
-        <div className={`px-4 ${isDarkMode ? 'pb-5 pt-2' : 'pb-4'} print:px-2 print:py-1`}>
+        <div className={`p-6 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'} print:px-2 print:py-1`}>
           {children}
         </div>
       )}
