@@ -1221,23 +1221,23 @@ function App() {
         <div 
           className={`
             ${isChatVisible ? 'fixed right-0 top-0 bottom-0 w-full max-w-[90%] sm:w-80 md:w-96 md:relative' : 'hidden md:flex'} 
-            md:w-96 border-l ${isDarkMode ? 'border-gray-700' : 'border-gray-700'} 
+            md:w-96 border-l ${isDarkMode ? 'border-gray-700' : 'border-gray-300'} 
             flex flex-col print:hidden
-            ${isChatVisible ? 'bg-gray-900 md:bg-transparent z-50 shadow-2xl md:shadow-none' : ''}
+            ${isChatVisible ? `${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'} md:bg-transparent z-50 shadow-2xl md:shadow-none` : ''}
             transition-all duration-300 ease-in-out h-full
           `}
         >
-          <div className={`p-4 border-b ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-700 bg-gray-800'} flex justify-between items-center`}>
+          <div className={`p-4 border-b ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-300 bg-gray-200'} flex justify-between items-center`}>
             <div className="flex items-center gap-2">
-              <Bot className={`h-5 w-5 ${isDarkMode ? 'text-gray-300' : 'text-blue-400'}`} />
-              <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-gray-300' : 'text-white'}`}>Analysis Assistant</h3>
+              <Bot className={`h-5 w-5 ${isDarkMode ? 'text-gray-300' : 'text-blue-600'}`} />
+              <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-800'}`}>Analysis Assistant</h3>
             </div>
             {/* Close button for mobile */}
             <button 
               onClick={() => setIsChatVisible(false)}
               className="md:hidden"
             >
-              <X className={`h-5 w-5 ${isDarkMode ? 'text-gray-300' : 'text-gray-300'}`} />
+              <X className={`h-5 w-5 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`} />
             </button>
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -1254,7 +1254,7 @@ function App() {
                         : 'bg-blue-600 text-white'
                       : isDarkMode
                         ? 'chat-message text-gray-100'
-                        : 'bg-gray-700 text-gray-100'
+                        : 'bg-gray-200 text-gray-800'
                   }`}
                 >
                   {message.text}
@@ -1266,19 +1266,19 @@ function App() {
                 <div className={`max-w-[80%] rounded-lg p-3 ${
                   isDarkMode
                     ? 'chat-message text-gray-100'
-                    : 'bg-gray-700 text-gray-100'
+                    : 'bg-gray-200 text-gray-800'
                 }`}>
                   <div className="flex gap-1">
-                    <div className={`w-2 h-2 ${isDarkMode ? 'bg-gray-400' : 'bg-gray-400'} rounded-full animate-bounce`}></div>
-                    <div className={`w-2 h-2 ${isDarkMode ? 'bg-gray-400' : 'bg-gray-400'} rounded-full animate-bounce [animation-delay:0.2s]`}></div>
-                    <div className={`w-2 h-2 ${isDarkMode ? 'bg-gray-400' : 'bg-gray-400'} rounded-full animate-bounce [animation-delay:0.4s]`}></div>
+                    <div className={`w-2 h-2 ${isDarkMode ? 'bg-gray-400' : 'bg-gray-500'} rounded-full animate-bounce`}></div>
+                    <div className={`w-2 h-2 ${isDarkMode ? 'bg-gray-400' : 'bg-gray-500'} rounded-full animate-bounce [animation-delay:0.2s]`}></div>
+                    <div className={`w-2 h-2 ${isDarkMode ? 'bg-gray-400' : 'bg-gray-500'} rounded-full animate-bounce [animation-delay:0.4s]`}></div>
                   </div>
                 </div>
               </div>
             )}
             <div ref={chatEndRef} />
           </div>
-          <form onSubmit={handleSendMessage} className={`p-4 border-t ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-700 bg-gray-800'}`}>
+          <form onSubmit={handleSendMessage} className={`p-4 border-t ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-300 bg-gray-200'}`}>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -1288,7 +1288,7 @@ function App() {
                 className={`flex-1 rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${
                   isDarkMode
                     ? 'bg-gray-700 text-white placeholder-gray-400 focus:ring-blue-500'
-                    : 'bg-gray-700 text-white placeholder-gray-400 focus:ring-blue-500'
+                    : 'bg-white text-gray-800 placeholder-gray-500 border border-gray-300 focus:ring-blue-500'
                 }`}
               />
               <button
