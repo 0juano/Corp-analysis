@@ -62,8 +62,7 @@ function App() {
     industry: true,
     earnings: true,
     developments: true,
-    positives: true,
-    negatives: true,
+    analysis: true,
     chat: true
   });
 
@@ -341,7 +340,7 @@ function App() {
         <div className={`flex-1 overflow-y-auto pb-0 flex flex-col items-center main-content-container ${isDarkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-100 text-gray-900'}`}>
           <div className="container mx-auto px-4 py-4 max-w-4xl print:px-2 print:py-1 w-full md:px-8">
             <div className="mb-8 print:mb-2">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center justify-between">
                 {/* ISIN Input - Left */}
                 <div className="relative">
                   <input
@@ -362,7 +361,7 @@ function App() {
                 
                 {/* Company Name & Ticker - Middle with truncation */}
                 {(isSearching || companyName) && (
-                  <div className={`${isDarkMode ? 'text-gray-300' : 'text-gray-700'} flex-1 min-w-0`}>
+                  <div className={`${isDarkMode ? 'text-gray-300' : 'text-gray-700'} flex-1 min-w-0 mx-4`}>
                     {isSearching ? (
                       <span className="animate-pulse text-lg">Searching...</span>
                     ) : (
@@ -380,9 +379,14 @@ function App() {
                   </div>
                 )}
                 {searchError && (
-                  <div className="text-amber-500 flex-1 min-w-0 truncate">
+                  <div className="text-amber-500 flex-1 min-w-0 truncate mx-4">
                     <p>{searchError}</p>
                   </div>
+                )}
+                
+                {/* Empty flex-grow div to push buttons to the right when no company name */}
+                {!isSearching && !companyName && !searchError && (
+                  <div className="flex-1"></div>
                 )}
                 
                 {/* Buttons - Right */}
