@@ -51,7 +51,10 @@ div[class*="bottom-0"][class*="absolute"] {
   top: 0 !important;
   bottom: auto !important;
   height: 100% !important;
-  z-index: 9999 !important;
+  max-height: 100vh !important;
+  width: 24rem !important;
+  max-width: 90% !important;
+  z-index: 50 !important;
 }
 
 /* Cyberpunk Theme */
@@ -80,6 +83,25 @@ div[class*="bottom-0"][class*="absolute"] {
   backdrop-filter: blur(10px);
   position: relative;
   z-index: 1;
+  margin-bottom: 1.5rem !important;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  padding: 0.25rem 0;
+}
+
+/* Add hover effect similar to non-cyberpunk mode */
+.cyberpunk .section-card:hover {
+  box-shadow: 0 0 20px rgba(0, 255, 157, 0.3);
+}
+
+/* Add consistent spacing for cyberpunk sections */
+.cyberpunk-sections > * {
+  margin-bottom: 1.5rem;
+}
+
+.cyberpunk-sections > *:last-child {
+  margin-bottom: 0;
 }
 
 .cyberpunk .neon-text {

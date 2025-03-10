@@ -269,7 +269,7 @@ function App() {
       <div className="flex flex-col md:flex-row h-screen relative">
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto pb-0">
-          <div className="container mx-auto px-4 py-8 max-w-4xl print:px-2 print:py-1">
+          <div className={`container mx-auto px-4 py-8 max-w-4xl print:px-2 print:py-1 ${isCyberpunk ? 'pt-6' : ''}`}>
             <div className="mb-8 print:mb-2">
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <div className="relative">
@@ -345,7 +345,7 @@ function App() {
               )}
             </div>
 
-            <div className="space-y-4 print:space-y-1">
+            <div className={`${isCyberpunk ? 'cyberpunk-sections' : 'space-y-4'} print:space-y-1`}>
               <Section
                 title="Business Overview"
                 isExpanded={expandedSections.business}
@@ -864,7 +864,7 @@ function Section({ title, children, isExpanded, onToggle, isDarkMode, isCyberpun
     }`}>
       <button
         onClick={onToggle}
-        className="w-full px-4 py-3 flex justify-between items-center"
+        className={`w-full px-4 py-3 flex justify-between items-center ${isCyberpunk ? 'py-4' : ''}`}
       >
         <h2 className={`font-semibold ${
           isCyberpunk 
@@ -892,7 +892,7 @@ function Section({ title, children, isExpanded, onToggle, isDarkMode, isCyberpun
         )}
       </button>
       {isExpanded && (
-        <div className="px-4 pb-4 print:px-2 print:py-1">
+        <div className={`px-4 ${isCyberpunk ? 'pb-5 pt-2' : 'pb-4'} print:px-2 print:py-1`}>
           {children}
         </div>
       )}
