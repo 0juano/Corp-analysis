@@ -113,9 +113,22 @@ div[class*="bottom-0"][class*="absolute"] {
     margin: 1.5cm;
   }
 
+  /* Preserve dark mode when printing */
+  body[data-print-mode="dark"] {
+    background-color: #1a202c !important;
+    color: #e2e8f0 !important;
+  }
+
+  /* Preserve light mode when printing */
+  body[data-print-mode="light"] {
+    background-color: #ffffff !important;
+    color: #1a202c !important;
+  }
+
   body {
-    background: white !important;
-    color: black !important;
+    /* Use the current theme colors instead of forcing white/black */
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 
   .container {
@@ -126,9 +139,56 @@ div[class*="bottom-0"][class*="absolute"] {
   textarea, input {
     border: none !important;
     background: transparent !important;
-    color: black !important;
+    /* Use the current theme colors instead of forcing black */
+    color: inherit !important;
     resize: none !important;
     padding: 0 !important;
+  }
+
+  /* Preserve dark mode for specific elements */
+  body[data-print-mode="dark"] .bg-gray-900 {
+    background-color: #1a202c !important;
+  }
+
+  body[data-print-mode="dark"] .bg-gray-800 {
+    background-color: #2d3748 !important;
+  }
+
+  body[data-print-mode="dark"] .text-gray-100 {
+    color: #f7fafc !important;
+  }
+
+  body[data-print-mode="dark"] .text-gray-200 {
+    color: #edf2f7 !important;
+  }
+
+  body[data-print-mode="dark"] .border-gray-700 {
+    border-color: #4a5568 !important;
+  }
+
+  /* Preserve light mode for specific elements */
+  body[data-print-mode="light"] .bg-white {
+    background-color: #ffffff !important;
+  }
+
+  body[data-print-mode="light"] .bg-gray-100 {
+    background-color: #f7fafc !important;
+  }
+
+  body[data-print-mode="light"] .bg-gray-200 {
+    background-color: #edf2f7 !important;
+  }
+
+  body[data-print-mode="light"] .text-gray-800 {
+    color: #2d3748 !important;
+  }
+
+  body[data-print-mode="light"] .text-gray-900 {
+    color: #1a202c !important;
+  }
+
+  body[data-print-mode="light"] .border-gray-300 {
+    border-color: #e2e8f0 !important;
   }
 
   h1 {
@@ -164,7 +224,7 @@ div[class*="bottom-0"][class*="absolute"] {
   }
 
   .border {
-    border-color: #ddd !important;
+    border-color: inherit !important;
   }
 
   .grid {

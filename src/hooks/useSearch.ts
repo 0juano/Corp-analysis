@@ -55,9 +55,13 @@ export const useSearch = () => {
       
       // Allow time for the UI to update before printing
       setTimeout(() => {
+        // Add a data attribute to the document body to preserve the current theme mode
+        document.body.dataset.printMode = document.body.classList.contains('dark') ? 'dark' : 'light';
         window.print();
       }, 100);
     } else {
+      // Add a data attribute to the document body to preserve the current theme mode
+      document.body.dataset.printMode = document.body.classList.contains('dark') ? 'dark' : 'light';
       window.print();
     }
   };

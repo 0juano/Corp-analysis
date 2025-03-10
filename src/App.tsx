@@ -96,6 +96,17 @@ function App() {
     formData.developments.filter(d => d.visible).length
   ]);
 
+  // Apply dark mode class to body
+  useEffect(() => {
+    if (isDarkMode) {
+      document.body.classList.add('dark');
+      document.body.classList.remove('light');
+    } else {
+      document.body.classList.add('light');
+      document.body.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+
   const fetchLinkPreview = async (url: string) => {
     try {
       const response = await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
