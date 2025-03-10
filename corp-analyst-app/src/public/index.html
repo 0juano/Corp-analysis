@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Analysis Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen dark">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">Chat Analysis Assistant</h1>
+            <p class="text-gray-600 dark:text-gray-300">Powered by Cohere with web search capabilities</p>
+            <button id="theme-toggle" class="mt-4 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition">
+                Switch to Light Mode
+            </button>
+        </header>
+
+        <main>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Ask a Question</h2>
+                <div class="mb-4">
+                    <textarea 
+                        id="user-input" 
+                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+                        rows="4" 
+                        placeholder="Enter your message or question here..."
+                    ></textarea>
+                </div>
+                <div class="flex justify-end">
+                    <button 
+                        id="submit-btn" 
+                        class="px-6 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition"
+                    >
+                        Analyze
+                    </button>
+                </div>
+            </div>
+
+            <div id="response-container" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6 hidden">
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Analysis Result</h2>
+                <div id="loading" class="hidden">
+                    <div class="flex justify-center items-center py-8">
+                        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+                    </div>
+                </div>
+                <div id="response-content" class="prose dark:prose-invert max-w-none"></div>
+                
+                <div id="sources-container" class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 hidden">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Sources</h3>
+                    <ul id="sources-list" class="list-disc pl-5 text-gray-700 dark:text-gray-300"></ul>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const htmlElement = document.documentElement;
+        
+        themeToggleBtn.addEventListener('click', () => {
+            if (htmlElement.classList.contains('dark')) {
+                htmlElement.classList.remove('dark');
+                themeToggleBtn.textContent = 'Switch to Dark Mode';
+            } else {
+                htmlElement.classList.add('dark');
+                themeToggleBtn.textContent = 'Switch to Light Mode';
+            }
+        });
+
+        // API interaction
+        const userInput = document.getElementById('user-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const responseContainer = document.getElementById('response-container');
+        const responseContent = document.getElementById('response-content');
+        const loading = document.getElementById('loading');
+        const sourcesContainer = document.getElementById('sources-container');
+        const sourcesList = document.getElementById('sources-list');
+
+        submitBtn.addEventListener('click', async () => {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // Show loading state
+            responseContainer.classList.remove('hidden');
+            loading.classList.remove('hidden');
+            responseContent.innerHTML = '';
+            sourcesContainer.classList.add('hidden');
+            sourcesList.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Display the analysis
+                    responseContent.innerHTML = data.analysis;
+                    
+                    // Display sources if available
+                    if (data.searchResults && data.searchResults.length > 0) {
+                        sourcesContainer.classList.remove('hidden');
+                        data.searchResults.forEach(result => {
+                            const li = document.createElement('li');
+                            const a = document.createElement('a');
+                            a.href = result.url;
+                            a.textContent = result.title || result.url;
+                            a.target = '_blank';
+                            a.className = 'text-primary-600 hover:underline';
+                            li.appendChild(a);
+                            sourcesList.appendChild(li);
+                        });
+                    }
+                } else {
+                    responseContent.innerHTML = `<p class="text-red-500">Error: ${data.error || 'Unknown error occurred'}</p>`;
+                }
+            } catch (error) {
+                responseContent.innerHTML = `<p class="text-red-500">Error: ${error.message || 'Failed to connect to the server'}</p>`;
+            } finally {
+                loading.classList.add('hidden');
+            }
+        });
+
+        // Allow Enter key to submit
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                submitBtn.click();
+            }
+        });
+    </script>
+</body>
+</html> 

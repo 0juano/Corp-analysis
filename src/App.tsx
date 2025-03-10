@@ -148,16 +148,44 @@ function App() {
     setCurrentMessage('');
     setIsChatLoading(true);
 
-    setTimeout(() => {
+    try {
+      // Call the Cohere API through our backend
+      const response = await fetch('http://localhost:3000/api/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message: currentMessage })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get response from Cohere API');
+      }
+
+      const data = await response.json();
+      
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: "I'm a placeholder response. In the future, I'll help you analyze companies and fill out this form!",
+        text: data.analysis || "Sorry, I couldn't process your request at this time.",
         sender: 'assistant',
         timestamp: new Date()
       };
+      
       setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error('Error calling Cohere API:', error);
+      
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "Sorry, there was an error connecting to the analysis service. Please try again later.",
+        sender: 'assistant',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsChatLoading(false);
-    }, 1000);
+    }
   };
 
   const handlePrint = () => {
