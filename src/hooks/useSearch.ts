@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { getCompanyNameFromIsin } from '../utils/yahooFinance';
 
 /**
  * Custom hook for managing search functionality
@@ -8,7 +9,9 @@ import { useState } from 'react';
 export const useSearch = () => {
   const [isin, setIsin] = useState('');
   const [companyName, setCompanyName] = useState('');
+  const [ticker, setTicker] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   /**
    * Handle ISIN submission
@@ -18,20 +21,45 @@ export const useSearch = () => {
   const handleIsinSubmit = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && isin.trim()) {
       setIsSearching(true);
+      setSearchError(null);
+      setCompanyName('');
+      setTicker('');
       
-      // Simulate API call
-      setTimeout(() => {
-        setCompanyName(`Company for ISIN: ${isin}`);
+      try {
+        // Fetch company info from Yahoo Finance API
+        const companyInfo = await getCompanyNameFromIsin(isin);
+        
+        if (companyInfo) {
+          setCompanyName(companyInfo.company_name);
+          setTicker(companyInfo.ticker);
+        } else {
+          setSearchError(`No company found for ISIN: ${isin}`);
+        }
+      } catch (error) {
+        console.error('Error in ISIN submission:', error);
+        setSearchError('Error connecting to company lookup service. Please try again later.');
+      } finally {
         setIsSearching(false);
-      }, 1000);
+      }
     }
   };
 
   /**
    * Handle print functionality
+   * 
+   * @param beforePrint - Optional callback to execute before printing
    */
-  const handlePrint = () => {
-    window.print();
+  const handlePrint = (beforePrint?: () => void) => {
+    if (beforePrint) {
+      beforePrint();
+      
+      // Allow time for the UI to update before printing
+      setTimeout(() => {
+        window.print();
+      }, 100);
+    } else {
+      window.print();
+    }
   };
 
   return {
@@ -39,8 +67,12 @@ export const useSearch = () => {
     setIsin,
     companyName,
     setCompanyName,
+    ticker,
+    setTicker,
     isSearching,
     setIsSearching,
+    searchError,
+    setSearchError,
     handleIsinSubmit,
     handlePrint
   };

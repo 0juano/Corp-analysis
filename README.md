@@ -9,6 +9,7 @@ A modern web application for corporate financial analysis, built with React, Typ
 - Corporate financial data analysis
 - Chat interface for AI assistance
 - Source management for research
+- ISIN lookup via Yahoo Finance API
 - Beautiful, production-ready UI
 
 ## Tech Stack
@@ -42,6 +43,35 @@ npm run dev
 
 Visit `http://localhost:5173` to see the application.
 
+### Setting up the Proxy Server
+
+The application uses a proxy server to avoid CORS issues when fetching data from the Yahoo Finance API.
+
+```bash
+# Navigate to the server directory
+cd server
+
+# Install server dependencies
+npm install
+
+# Start the server
+node server.js
+```
+
+The proxy server will run on port 3001. Make sure it's running when using the ISIN lookup feature.
+
+#### Testing the Proxy Server
+
+You can test if the proxy server is working correctly with:
+
+```bash
+curl -s "http://localhost:3001/api/yahoo-finance/search?isin=US0378331005" | jq
+```
+
+This should return information about Apple Inc.
+
+For more details, see [server/README.md](server/README.md).
+
 ## Development Standards
 
 We follow strict coding standards:
@@ -67,7 +97,15 @@ src/
 ├── App.tsx         # Main application component
 ├── main.tsx        # Application entry point
 └── index.css       # Global styles
+server/             # Proxy server for API requests
 ```
+
+## Recent Updates
+
+- Enhanced Yahoo Finance API integration with improved error handling
+- Added detailed logging to the proxy server for easier debugging
+- UI improvements for better mobile responsiveness
+- Optimized layout for better usability
 
 ## Building for Production
 

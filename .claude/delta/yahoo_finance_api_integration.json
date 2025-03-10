@@ -1,0 +1,55 @@
+{
+  "delta_id": "yahoo_finance_api_integration_2025_03_10",
+  "timestamp": "2025-03-10T19:15:00Z",
+  "author": "Claude",
+  "title": "Yahoo Finance API Integration Improvements",
+  "description": "Enhanced the Yahoo Finance API integration to resolve CORS issues and improve reliability of ISIN lookups",
+  "changes": [
+    {
+      "component": "server/server.js",
+      "type": "enhancement",
+      "description": "Added detailed request logging for better debugging",
+      "details": "Implemented middleware to log all incoming requests with timestamps, added specific logging for ISIN searches and API response status codes"
+    },
+    {
+      "component": "server/server.js",
+      "type": "bugfix",
+      "description": "Simplified Yahoo Finance API request parameters",
+      "details": "Removed unnecessary parameters that may have caused inconsistent responses, aligned implementation with working Python example"
+    },
+    {
+      "component": "src/utils/yahooFinance.ts",
+      "type": "enhancement",
+      "description": "Improved error handling and response processing",
+      "details": "Added logging of API responses, enhanced error handling with more descriptive messages, updated response parsing to handle different response formats"
+    },
+    {
+      "component": "src/App.tsx",
+      "type": "ui",
+      "description": "UI improvements for better user experience",
+      "details": "Reduced ISIN input field width, kept action buttons aligned on the same line, truncated long company names with tooltips, simplified print button to show only icon"
+    }
+  ],
+  "api_changes": [
+    {
+      "endpoint": "/api/yahoo-finance/search",
+      "type": "parameter",
+      "description": "Simplified query parameters",
+      "before": "Used complex parameter structure with quotesQueryId",
+      "after": "Uses only ISIN parameter for simpler and more reliable requests"
+    }
+  ],
+  "behavior_changes": [
+    {
+      "component": "ISIN lookup",
+      "description": "More consistent company name and ticker retrieval",
+      "details": "The lookup now consistently returns company information when available, with improved error handling when no matches are found"
+    },
+    {
+      "component": "UI layout",
+      "description": "More compact and responsive header layout",
+      "details": "Reduced width of ISIN input field, kept action buttons aligned on the right side, improved handling of long company names"
+    }
+  ],
+  "reasoning": "The Yahoo Finance API integration was experiencing intermittent issues due to overly complex request parameters and insufficient error handling. By simplifying the requests based on a working Python example and adding comprehensive logging, we've made the integration more reliable and easier to debug. UI improvements enhance usability while maintaining the original design intent."
+} 

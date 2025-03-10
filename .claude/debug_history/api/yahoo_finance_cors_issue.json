@@ -1,0 +1,58 @@
+{
+  "session_id": "yahoo_finance_cors_issue_2025_03_10",
+  "timestamp": "2025-03-10T19:15:00Z",
+  "issue_type": "API Integration",
+  "components": ["server/server.js", "src/utils/yahooFinance.ts"],
+  "error_description": "Yahoo Finance API integration stopped working after initially functioning correctly",
+  "error_context": {
+    "symptoms": [
+      "ISIN lookup was working but then stopped returning results",
+      "No visible error messages in the console",
+      "Server was successfully proxying requests but not getting expected data"
+    ],
+    "environment": {
+      "browser": "Chrome",
+      "node_version": "v20.18.1",
+      "os": "macOS"
+    }
+  },
+  "investigation": [
+    {
+      "step": "Analyzed server logs",
+      "findings": "Server was successfully making requests to Yahoo Finance API but the response format may have changed"
+    },
+    {
+      "step": "Compared with working Python implementation",
+      "findings": "Python implementation used simpler request parameters and was still working"
+    },
+    {
+      "step": "Added detailed logging",
+      "findings": "Confirmed that the API was returning data but our parsing logic wasn't handling it correctly"
+    }
+  ],
+  "solution": {
+    "changes": [
+      {
+        "file": "server/server.js",
+        "description": "Simplified request parameters to match working Python example",
+        "details": "Removed unnecessary parameters that may have been causing issues"
+      },
+      {
+        "file": "server/server.js",
+        "description": "Added comprehensive request logging",
+        "details": "Added middleware to log all requests with timestamps and specific logging for ISIN searches"
+      },
+      {
+        "file": "src/utils/yahooFinance.ts",
+        "description": "Improved error handling and response processing",
+        "details": "Added logging of API responses and enhanced error handling with more descriptive messages"
+      }
+    ],
+    "verification": "Tested with multiple ISINs including US0378331005 (Apple) and confirmed consistent results"
+  },
+  "lessons_learned": [
+    "External APIs may change behavior without notice - simplify request parameters when possible",
+    "Comprehensive logging is essential for debugging API integration issues",
+    "Having a working reference implementation (Python script) was invaluable for troubleshooting"
+  ]
+} 

@@ -1,0 +1,34 @@
+{
+  "qa_id": "yahoo_finance_isin_lookup_2025_03_10",
+  "topic": "Yahoo Finance API ISIN Lookup",
+  "components": ["server/server.js", "src/utils/yahooFinance.ts", "src/hooks/useSearch.ts"],
+  "questions": [
+    {
+      "question": "Why is my ISIN lookup not returning any results?",
+      "answer": "There could be several reasons:\n1. The proxy server might not be running (check if server is running on port 3001)\n2. The ISIN might not be valid or not recognized by Yahoo Finance\n3. There might be network connectivity issues\n4. The Yahoo Finance API might have changed its response format\n\nCheck the server logs for detailed information about the request and response. The server now logs all requests with timestamps and specific information about ISIN searches.",
+      "context": "After the recent updates, the server logs all requests and responses, making it easier to diagnose issues."
+    },
+    {
+      "question": "How does the ISIN lookup work?",
+      "answer": "The ISIN lookup works as follows:\n1. The user enters an ISIN in the input field\n2. The frontend sends a request to our proxy server at `/api/yahoo-finance/search?isin=<ISIN>`\n3. The proxy server forwards the request to Yahoo Finance API\n4. Yahoo Finance returns data about the company associated with the ISIN\n5. The proxy server processes the response and returns it to the frontend\n6. The frontend displays the company name and ticker symbol\n\nThe proxy server is necessary to avoid CORS issues when making requests directly to Yahoo Finance from the browser.",
+      "context": "The implementation was simplified based on a working Python example to improve reliability."
+    },
+    {
+      "question": "What format should the ISIN be in?",
+      "answer": "An ISIN (International Securities Identification Number) should be exactly 12 characters long. It consists of:\n1. A two-letter country code\n2. A nine-character alphanumeric national security identifier\n3. A single check digit\n\nExamples:\n- US0378331005 (Apple Inc.)\n- US58733R1023 (Mercadolibre Inc)\n\nThe input field automatically converts input to uppercase and limits to 12 characters.",
+      "context": "The application validates that the ISIN is exactly 12 characters before submitting the search."
+    },
+    {
+      "question": "How can I test if the Yahoo Finance API integration is working?",
+      "answer": "You can test the Yahoo Finance API integration in several ways:\n\n1. Using curl directly:\n```bash\ncurl -s \"http://localhost:3001/api/yahoo-finance/search?isin=US0378331005\" | jq\n```\n\n2. Through the application UI:\n   - Make sure the server is running (`cd server && node server.js`)\n   - Enter a valid ISIN like US0378331005 in the input field\n   - Press Enter to submit\n\n3. Check the server logs for request and response information",
+      "context": "The server now includes detailed logging that makes it easier to diagnose issues."
+    }
+  ],
+  "related_issues": [
+    {
+      "issue_id": "yahoo_finance_cors_issue_2025_03_10",
+      "description": "Yahoo Finance API integration stopped working after initially functioning correctly"
+    }
+  ],
+  "last_updated": "2025-03-10T19:15:00Z"
+} 

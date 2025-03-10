@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Sun, Moon, ChevronUp, ChevronDown, X, Search, Printer, Send, Bot } from 'lucide-react';
+import { useSearch } from './hooks/useSearch';
 
 interface Development {
   emoji: 'up' | 'down';
@@ -35,9 +36,17 @@ interface LinkPreview {
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [isin, setIsin] = useState('');
-  const [companyName, setCompanyName] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
+  const { 
+    isin, 
+    setIsin, 
+    companyName,
+    ticker, 
+    isSearching, 
+    setIsSearching,
+    searchError,
+    handleIsinSubmit,
+    handlePrint 
+  } = useSearch();
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentMessage, setCurrentMessage] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
@@ -53,7 +62,9 @@ function App() {
     industry: true,
     earnings: true,
     developments: true,
-    analysis: true
+    positives: true,
+    negatives: true,
+    chat: true
   });
 
   const [formData, setFormData] = useState({
@@ -188,30 +199,6 @@ function App() {
     }
   };
 
-  const handlePrint = () => {
-    const allExpanded = Object.keys(expandedSections).reduce((acc, key) => ({
-      ...acc,
-      [key]: true
-    }), {});
-    setExpandedSections(allExpanded);
-    
-    setTimeout(() => {
-      window.print();
-    }, 100);
-  };
-
-  const handleIsinSubmit = async (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && isin.length === 12) {
-      setIsSearching(true);
-      setCompanyName('');
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setCompanyName('Sample Company Name Ltd.');
-      setIsSearching(false);
-    }
-  };
-
   const handleInputChange = (section: string, value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -324,6 +311,18 @@ function App() {
   const visibleDevelopments = formData.developments.filter(d => d.visible);
   const canAddDevelopment = visibleDevelopments.length < 5;
 
+  // Add a function to prepare for printing
+  /**
+   * Prepares the document for printing by expanding all sections
+   */
+  const prepareForPrinting = () => {
+    const allExpanded = Object.keys(expandedSections).reduce((acc, key) => ({
+      ...acc,
+      [key]: true
+    }), {});
+    setExpandedSections(allExpanded);
+  };
+
   return (
     <div className={`min-h-screen ${isDarkMode ? 'dark bg-gray-900' : 'bg-white'}`}>
       <div className="flex flex-col md:flex-row h-screen relative">
@@ -339,7 +338,7 @@ function App() {
                     onChange={(e) => setIsin(e.target.value.toUpperCase())}
                     onKeyDown={handleIsinSubmit}
                     placeholder="Enter ISIN"
-                    className={`${inputClass} py-1 px-2 w-44 text-lg font-mono uppercase`}
+                    className={`${inputClass} py-1 px-2 w-36 text-lg font-mono uppercase`}
                     maxLength={12}
                   />
                   {isSearching && (
@@ -348,24 +347,36 @@ function App() {
                     </div>
                   )}
                 </div>
+                
                 {(isSearching || companyName) && (
                   <div className={`${isDarkMode ? 'text-gray-300' : 'text-gray-700'} flex-grow`}>
                     {isSearching ? (
                       <span className="animate-pulse text-lg">Searching...</span>
                     ) : (
-                      <h2 className="text-2xl font-bold">{companyName}</h2>
+                      <div>
+                        <h2 className="text-2xl font-bold" title={companyName}>
+                          {companyName.length > 40 ? `${companyName.substring(0, 40)}...` : companyName}
+                        </h2>
+                        {ticker && (
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Ticker: {ticker}
+                          </p>
+                        )}
+                      </div>
                     )}
+                  </div>
+                )}
+                {searchError && (
+                  <div className="text-amber-500 flex-grow">
+                    <p>{searchError}</p>
                   </div>
                 )}
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={handlePrint}
-                    className={`p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 print:hidden ${
-                      isDarkMode ? 'text-gray-300' : 'text-gray-600'
-                    }`}
-                    title="Print report"
+                    onClick={() => handlePrint(prepareForPrinting)}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
-                    <Printer className="h-5 w-5" />
+                    <Printer size={18} />
                   </button>
                   <button
                     onClick={toggleDarkMode}
