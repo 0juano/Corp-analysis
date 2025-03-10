@@ -6,6 +6,15 @@
 textarea {
   transition: height 0.1s ease;
   line-height: 1.5;
+  min-height: 32px; /* Ensure minimum height matches the JavaScript value */
+  box-sizing: border-box;
+  overflow-y: hidden; /* Hide scrollbars when adjusting height */
+}
+
+/* Ensure textareas resize smoothly and don't jump */
+textarea.resize-none {
+  resize: none;
+  overflow-wrap: break-word;
 }
 
 /* Ensure consistent container alignment */

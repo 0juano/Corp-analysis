@@ -267,7 +267,7 @@ function App() {
 
   const textareaClass = `${inputClass} min-h-[100px] resize-none w-full`;
   
-  const multilineInputClass = `${inputClass} h-[32px] resize-none overflow-hidden`;
+  const multilineInputClass = `${inputClass} h-[32px] min-h-[32px] resize-none overflow-hidden`;
 
   const adjustHeight = (element: HTMLTextAreaElement) => {
     // Reset height to minimum to accurately calculate the new height
@@ -277,6 +277,9 @@ function App() {
     // If content requires more height than minimum, adjust it
     if (scrollHeight > 32) {
       element.style.height = `${Math.min(scrollHeight, 200)}px`;
+    } else {
+      // Ensure height is set to minimum when content doesn't require more space
+      element.style.height = '32px';
     }
   };
 
@@ -947,6 +950,8 @@ function App() {
                           }}
                           onFocus={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
                           onInput={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
+                          onKeyUp={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
+                          onPaste={(e) => setTimeout(() => adjustHeight(e.target as HTMLTextAreaElement), 0)}
                           className={`${multilineInputClass} flex-grow`}
                         />
                       </div>
@@ -1099,7 +1104,7 @@ function App() {
               </Section>
 
               <Section
-                title="Analysis"
+                title="Positives and Negatives"
                 isExpanded={expandedSections.analysis}
                 onToggle={() => toggleSection('analysis')}
                 isDarkMode={isDarkMode}
@@ -1108,11 +1113,6 @@ function App() {
                   <div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <h4 className={`font-medium mb-2 ${
-                          isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                        }`}>
-                          Positives
-                        </h4>
                         <div className="space-y-2">
                           {formData.positives.filter(p => p.visible).map((point, index) => (
                             <div key={`positive-${index}`} className="flex items-center gap-2">
@@ -1125,6 +1125,8 @@ function App() {
                                 }}
                                 onFocus={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
                                 onInput={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
+                                onKeyUp={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
+                                onPaste={(e) => setTimeout(() => adjustHeight(e.target as HTMLTextAreaElement), 0)}
                                 className={`${multilineInputClass} flex-grow`}
                               />
                               <button
@@ -1155,11 +1157,6 @@ function App() {
                         </div>
                       </div>
                       <div>
-                        <h4 className={`font-medium mb-2 ${
-                          isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                        }`}>
-                          Negatives
-                        </h4>
                         <div className="space-y-2">
                           {formData.negatives.filter(p => p.visible).map((point, index) => (
                             <div key={`negative-${index}`} className="flex items-center gap-2">
@@ -1172,6 +1169,8 @@ function App() {
                                 }}
                                 onFocus={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
                                 onInput={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
+                                onKeyUp={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
+                                onPaste={(e) => setTimeout(() => adjustHeight(e.target as HTMLTextAreaElement), 0)}
                                 className={`${multilineInputClass} flex-grow`}
                               />
                               <button
