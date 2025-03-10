@@ -338,7 +338,7 @@ function App() {
     <div className={`min-h-screen ${isDarkMode ? 'dark bg-gray-900' : 'bg-white'}`}>
       <div className="flex flex-col md:flex-row h-screen relative">
         {/* Main Content */}
-        <div className="flex-1 overflow-y-auto pb-0 flex flex-col items-center">
+        <div className={`flex-1 overflow-y-auto pb-0 flex flex-col items-center main-content-container ${isDarkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-100 text-gray-900'}`}>
           <div className="container mx-auto px-4 py-4 max-w-4xl print:px-2 print:py-1 w-full md:px-8">
             <div className="mb-8 print:mb-2">
               <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -385,7 +385,7 @@ function App() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handlePrint(prepareForPrinting)}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors print:hidden"
                   >
                     <Printer size={18} />
                   </button>

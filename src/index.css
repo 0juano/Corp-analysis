@@ -109,10 +109,21 @@ div[class*="bottom-0"][class*="absolute"] {
 }
 
 @media print {
+  /* General print styles */
   @page {
-    margin: 1.5cm;
+    size: letter portrait;
+    margin: 0.5cm;
   }
-
+  
+  body {
+    font-size: 9pt !important;
+    line-height: 1.1 !important;
+    overflow: visible !important;
+    /* Use the current theme colors instead of forcing white/black */
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  
   /* Preserve dark mode when printing */
   body[data-print-mode="dark"] {
     background-color: #1a202c !important;
@@ -124,27 +135,7 @@ div[class*="bottom-0"][class*="absolute"] {
     background-color: #ffffff !important;
     color: #1a202c !important;
   }
-
-  body {
-    /* Use the current theme colors instead of forcing white/black */
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
-  }
-
-  .container {
-    max-width: 100% !important;
-    padding: 0 !important;
-  }
-
-  textarea, input {
-    border: none !important;
-    background: transparent !important;
-    /* Use the current theme colors instead of forcing black */
-    color: inherit !important;
-    resize: none !important;
-    padding: 0 !important;
-  }
-
+  
   /* Preserve dark mode for specific elements */
   body[data-print-mode="dark"] .bg-gray-900 {
     background-color: #1a202c !important;
@@ -190,73 +181,89 @@ div[class*="bottom-0"][class*="absolute"] {
   body[data-print-mode="light"] .border-gray-300 {
     border-color: #e2e8f0 !important;
   }
-
-  h1 {
-    font-size: 1.5rem !important;
-    margin-bottom: 1rem !important;
-  }
-
-  h2 {
-    font-size: 1.25rem !important;
-    margin-bottom: 0.75rem !important;
-  }
-
-  .print\:space-y-1 > * + * {
-    margin-top: 0.25rem !important;
-  }
-
-  .print\:p-1 {
-    padding: 0.25rem !important;
-  }
-
-  .print\:px-2 {
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
-  }
-
-  .print\:py-1 {
-    padding-top: 0.25rem !important;
-    padding-bottom: 0.25rem !important;
-  }
-
-  .print\:hidden {
+  
+  /* Hide scrollbars */
+  ::-webkit-scrollbar {
     display: none !important;
   }
-
-  .border {
-    border-color: inherit !important;
+  
+  * {
+    overflow: visible !important;
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
   }
-
-  .grid {
-    display: block !important;
-  }
-
+  
+  /* Reduce spacing */
   .mb-8 {
-    margin-bottom: 1rem !important;
-  }
-
-  .mb-4 {
     margin-bottom: 0.5rem !important;
   }
-
-  .text-sm {
-    font-size: 0.75rem !important;
+  
+  .p-6 {
+    padding: 0.5rem !important;
   }
-
-  .text-lg {
-    font-size: 1rem !important;
+  
+  .p-5 {
+    padding: 0.4rem !important;
   }
-
-  .space-y-2 > * + * {
-    margin-top: 0.5rem !important;
+  
+  .p-4 {
+    padding: 0.3rem !important;
   }
-
-  .gap-2 {
-    gap: 0.5rem !important;
+  
+  /* Smaller text for content */
+  textarea, input, p, div {
+    font-size: 9pt !important;
+    line-height: 1.1 !important;
   }
-
+  
+  h1, h2, h3 {
+    font-size: 11pt !important;
+    line-height: 1.1 !important;
+    margin-top: 0.3rem !important;
+    margin-bottom: 0.3rem !important;
+  }
+  
   textarea {
     min-height: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+    border: none !important;
+    background: transparent !important;
+    /* Use the current theme colors instead of forcing black */
+    color: inherit !important;
+    resize: none !important;
+  }
+
+  /* Hide robot icon in print mode - more specific selectors */
+  svg[data-lucide="Bot"],
+  svg.lucide-bot,
+  .bot-icon,
+  [class*="lucide-bot"],
+  .print-hide-bot {
+    display: none !important;
+  }
+  
+  /* Hide the entire header container with the bot icon */
+  .analysis-assistant-header {
+    display: none !important;
+  }
+  
+  /* Force page break avoidance */
+  .page-break-inside-avoid {
+    page-break-inside: avoid !important;
+  }
+  
+  /* Ensure content fits on one page */
+  .main-content-container {
+    max-height: 100% !important;
+    height: auto !important;
+  }
+
+  /* Hide print button and other UI elements in print mode */
+  .print:hidden,
+  .print-hidden,
+  button[class*="print:hidden"] {
+    display: none !important;
   }
 }
 
