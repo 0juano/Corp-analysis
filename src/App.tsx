@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Sun, Moon, ChevronUp, ChevronDown, X, Search, Printer, Send, Bot } from 'lucide-react';
-import { Tooltip } from 'react-tooltip';
 
 interface Development {
   emoji: 'up' | 'down';
@@ -24,6 +23,7 @@ interface Source {
   id: string;
   url: string;
   timestamp: number;
+  section: 'business' | 'ownership' | 'industry' | 'earnings' | 'developments';
 }
 
 interface LinkPreview {
@@ -42,7 +42,7 @@ function App() {
   const [currentMessage, setCurrentMessage] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [sources, setSources] = useState<Source[]>([]);
-  const [showSourceInput, setShowSourceInput] = useState(false);
+  const [showSourceInput, setShowSourceInput] = useState<string | null>(null);
   const [newSourceUrl, setNewSourceUrl] = useState('');
   const [linkPreviews, setLinkPreviews] = useState<Record<string, LinkPreview>>({});
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -105,16 +105,17 @@ function App() {
     }
   };
 
-  const handleAddSource = () => {
+  const handleAddSource = (section: 'business' | 'ownership' | 'industry' | 'earnings' | 'developments') => {
     if (newSourceUrl && newSourceUrl.startsWith('http')) {
       const newSource: Source = {
         id: `source-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         url: newSourceUrl,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        section
       };
       setSources(prevSources => [...prevSources, newSource]);
       setNewSourceUrl('');
-      setShowSourceInput(false);
+      setShowSourceInput(null);
       fetchLinkPreview(newSourceUrl);
     }
   };
@@ -383,7 +384,17 @@ function App() {
                     className={textareaClass}
                   />
                   <div className="flex flex-wrap gap-2 items-center mt-2">
-                    {sources.map((source) => (
+                    <button
+                      onClick={() => setShowSourceInput('business')}
+                      className={`text-xs px-2 py-1 rounded-full ${
+                        isDarkMode
+                          ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
+                          : 'bg-gray-200 text-blue-600 hover:bg-gray-300'
+                      } flex items-center justify-center print:hidden`}
+                    >
+                      <span className="flex items-center justify-center w-4 h-4 rounded-full border border-current">+</span>
+                    </button>
+                    {sources.filter(source => source.section === 'business').map((source, index) => (
                       <div key={source.id} className="relative group">
                         <div className="flex items-center gap-1">
                           <a
@@ -394,11 +405,44 @@ function App() {
                               isDarkMode
                                 ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
                                 : 'bg-gray-200 text-blue-600 hover:bg-gray-300'
-                            } flex items-center gap-1`}
+                            } flex items-center gap-1 relative group`}
                           >
-                            <span className="truncate max-w-[100px] sm:max-w-[150px]">
-                              {linkPreviews[source.url]?.title || new URL(source.url).hostname}
-                            </span>
+                            <span>({index + 1})</span>
+                            {/* Hover preview */}
+                            {linkPreviews[source.url] && (
+                              <div className="absolute bottom-full left-0 mb-2 w-64 hidden group-hover:block z-10">
+                                <div className={`rounded-lg shadow-lg overflow-hidden ${
+                                  isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
+                                }`}>
+                                  {linkPreviews[source.url].image && (
+                                    <div className="w-full h-32 bg-gray-100 overflow-hidden">
+                                      <img 
+                                        src={linkPreviews[source.url].image} 
+                                        alt={linkPreviews[source.url].title || 'Link preview'} 
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </div>
+                                  )}
+                                  <div className="p-3">
+                                    <h4 className={`font-bold text-sm mb-1 truncate ${
+                                      isDarkMode ? 'text-white' : 'text-gray-800'
+                                    }`}>
+                                      {linkPreviews[source.url].title || new URL(source.url).hostname}
+                                    </h4>
+                                    <p className={`text-xs line-clamp-2 ${
+                                      isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                                    }`}>
+                                      {linkPreviews[source.url].description || 'No description available'}
+                                    </p>
+                                    <p className={`text-xs mt-1 truncate ${
+                                      isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                                    }`}>
+                                      {new URL(source.url).hostname}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </a>
                           <button
                             onClick={() => handleRemoveSource(source.id)}
@@ -406,46 +450,31 @@ function App() {
                               isDarkMode
                                 ? 'text-red-500 hover:text-red-700'
                                 : 'text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300'
-                            } opacity-0 group-hover:opacity-100 transition-opacity print:hidden`}
+                            } print:hidden flex-shrink-0`}
                             title="Remove source"
                           >
                             <X className="h-3 w-3" />
                           </button>
                         </div>
-                        <div
-                          data-tooltip-id={`source-preview-${source.id}`}
-                          data-tooltip-content="Loading preview..."
-                          className="absolute bottom-0 left-0"
-                        ></div>
-                        <Tooltip
-                          id={`source-preview-${source.id}`}
-                          place="bottom"
-                          className={`max-w-xs`}
-                        >
-                          {linkPreviews[source.url] ? (
-                            <div className="p-2">
-                              <div className="font-bold mb-1">{linkPreviews[source.url].title}</div>
-                              <div className="text-sm">{linkPreviews[source.url].description}</div>
-                            </div>
-                          ) : (
-                            "Loading preview..."
-                          )}
-                        </Tooltip>
                       </div>
                     ))}
-                    {showSourceInput ? (
+                    {showSourceInput === 'business' ? (
                       <div className="flex items-center gap-1 flex-wrap sm:flex-nowrap">
                         <input
                           type="text"
                           value={newSourceUrl}
                           onChange={(e) => setNewSourceUrl(e.target.value)}
                           placeholder="Enter URL"
-                          className={`${inputClass} py-1 px-2 text-sm w-full sm:w-auto`}
+                          className={`text-xs py-1 px-2 rounded-md border ${
+                            isDarkMode
+                              ? 'bg-gray-800 border-gray-700 text-white focus:ring-blue-500 focus:border-blue-500'
+                              : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
+                          } focus:outline-none focus:ring-2 w-full sm:w-auto text-[11px]`}
                         />
                         <div className="flex gap-1 mt-1 sm:mt-0">
                           <button
-                            onClick={handleAddSource}
-                            className={`px-2 py-1 rounded-md text-xs ${
+                            onClick={() => handleAddSource('business')}
+                            className={`px-2 py-1 rounded-md text-[11px] ${
                               isDarkMode
                                 ? 'bg-blue-600 text-white hover:bg-blue-700'
                                 : 'bg-blue-500 text-white hover:bg-blue-600'
@@ -455,10 +484,10 @@ function App() {
                           </button>
                           <button
                             onClick={() => {
-                              setShowSourceInput(false);
+                              setShowSourceInput(null);
                               setNewSourceUrl('');
                             }}
-                            className={`px-2 py-1 rounded-md text-xs ${
+                            className={`px-2 py-1 rounded-md text-[11px] ${
                               isDarkMode
                                 ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                                 : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
@@ -469,16 +498,7 @@ function App() {
                         </div>
                       </div>
                     ) : (
-                      <button
-                        onClick={() => setShowSourceInput(true)}
-                        className={`text-xs px-2 py-1 rounded-full ${
-                          isDarkMode
-                            ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
-                            : 'bg-gray-200 text-blue-600 hover:bg-gray-300'
-                        } flex items-center gap-1 print:hidden`}
-                      >
-                        + Add Source
-                      </button>
+                      null
                     )}
                   </div>
                 </div>
@@ -500,6 +520,124 @@ function App() {
                   onInput={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
                   className={textareaClass}
                 />
+                <div className="flex flex-wrap gap-2 items-center mt-2">
+                  <button
+                    onClick={() => setShowSourceInput('ownership')}
+                    className={`text-xs px-2 py-1 rounded-full ${
+                      isDarkMode
+                        ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
+                        : 'bg-gray-200 text-blue-600 hover:bg-gray-300'
+                    } flex items-center justify-center print:hidden`}
+                  >
+                    <span className="flex items-center justify-center w-4 h-4 rounded-full border border-current">+</span>
+                  </button>
+                  {sources.filter(source => source.section === 'ownership').map((source, index) => (
+                    <div key={source.id} className="relative group">
+                      <div className="flex items-center gap-1">
+                        <a
+                          href={source.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`text-xs px-2 py-1 rounded-full ${
+                            isDarkMode
+                              ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
+                              : 'bg-gray-200 text-blue-600 hover:bg-gray-300'
+                          } flex items-center gap-1 relative group`}
+                        >
+                          <span>({index + 1})</span>
+                          {/* Hover preview */}
+                          {linkPreviews[source.url] && (
+                            <div className="absolute bottom-full left-0 mb-2 w-64 hidden group-hover:block z-10">
+                              <div className={`rounded-lg shadow-lg overflow-hidden ${
+                                isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
+                              }`}>
+                                {linkPreviews[source.url].image && (
+                                  <div className="w-full h-32 bg-gray-100 overflow-hidden">
+                                    <img 
+                                      src={linkPreviews[source.url].image} 
+                                      alt={linkPreviews[source.url].title || 'Link preview'} 
+                                      className="w-full h-full object-cover"
+                                    />
+                                  </div>
+                                )}
+                                <div className="p-3">
+                                  <h4 className={`font-bold text-sm mb-1 truncate ${
+                                    isDarkMode ? 'text-white' : 'text-gray-800'
+                                  }`}>
+                                    {linkPreviews[source.url].title || new URL(source.url).hostname}
+                                  </h4>
+                                  <p className={`text-xs line-clamp-2 ${
+                                    isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                                  }`}>
+                                    {linkPreviews[source.url].description || 'No description available'}
+                                  </p>
+                                  <p className={`text-xs mt-1 truncate ${
+                                    isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                                  }`}>
+                                    {new URL(source.url).hostname}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </a>
+                        <button
+                          onClick={() => handleRemoveSource(source.id)}
+                          className={`p-1 rounded-full ${
+                            isDarkMode
+                              ? 'text-red-500 hover:text-red-700'
+                              : 'text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300'
+                          } print:hidden flex-shrink-0`}
+                          title="Remove source"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {showSourceInput === 'ownership' ? (
+                    <div className="flex items-center gap-1 flex-wrap sm:flex-nowrap">
+                      <input
+                        type="text"
+                        value={newSourceUrl}
+                        onChange={(e) => setNewSourceUrl(e.target.value)}
+                        placeholder="Enter URL"
+                        className={`text-xs py-1 px-2 rounded-md border ${
+                          isDarkMode
+                            ? 'bg-gray-800 border-gray-700 text-white focus:ring-blue-500 focus:border-blue-500'
+                            : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
+                        } focus:outline-none focus:ring-2 w-full sm:w-auto text-[11px]`}
+                      />
+                      <div className="flex gap-1 mt-1 sm:mt-0">
+                        <button
+                          onClick={() => handleAddSource('ownership')}
+                          className={`px-2 py-1 rounded-md text-[11px] ${
+                            isDarkMode
+                              ? 'bg-blue-600 text-white hover:bg-blue-700'
+                              : 'bg-blue-500 text-white hover:bg-blue-600'
+                          }`}
+                        >
+                          Add
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowSourceInput(null);
+                            setNewSourceUrl('');
+                          }}
+                          className={`px-2 py-1 rounded-md text-[11px] ${
+                            isDarkMode
+                              ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                              : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                          }`}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    null
+                  )}
+                </div>
               </Section>
 
               <Section
@@ -518,6 +656,124 @@ function App() {
                   onInput={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
                   className={textareaClass}
                 />
+                <div className="flex flex-wrap gap-2 items-center mt-2">
+                  <button
+                    onClick={() => setShowSourceInput('industry')}
+                    className={`text-xs px-2 py-1 rounded-full ${
+                      isDarkMode
+                        ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
+                        : 'bg-gray-200 text-blue-600 hover:bg-gray-300'
+                    } flex items-center justify-center print:hidden`}
+                  >
+                    <span className="flex items-center justify-center w-4 h-4 rounded-full border border-current">+</span>
+                  </button>
+                  {sources.filter(source => source.section === 'industry').map((source, index) => (
+                    <div key={source.id} className="relative group">
+                      <div className="flex items-center gap-1">
+                        <a
+                          href={source.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`text-xs px-2 py-1 rounded-full ${
+                            isDarkMode
+                              ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
+                              : 'bg-gray-200 text-blue-600 hover:bg-gray-300'
+                          } flex items-center gap-1 relative group`}
+                        >
+                          <span>({index + 1})</span>
+                          {/* Hover preview */}
+                          {linkPreviews[source.url] && (
+                            <div className="absolute bottom-full left-0 mb-2 w-64 hidden group-hover:block z-10">
+                              <div className={`rounded-lg shadow-lg overflow-hidden ${
+                                isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
+                              }`}>
+                                {linkPreviews[source.url].image && (
+                                  <div className="w-full h-32 bg-gray-100 overflow-hidden">
+                                    <img 
+                                      src={linkPreviews[source.url].image} 
+                                      alt={linkPreviews[source.url].title || 'Link preview'} 
+                                      className="w-full h-full object-cover"
+                                    />
+                                  </div>
+                                )}
+                                <div className="p-3">
+                                  <h4 className={`font-bold text-sm mb-1 truncate ${
+                                    isDarkMode ? 'text-white' : 'text-gray-800'
+                                  }`}>
+                                    {linkPreviews[source.url].title || new URL(source.url).hostname}
+                                  </h4>
+                                  <p className={`text-xs line-clamp-2 ${
+                                    isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                                  }`}>
+                                    {linkPreviews[source.url].description || 'No description available'}
+                                  </p>
+                                  <p className={`text-xs mt-1 truncate ${
+                                    isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                                  }`}>
+                                    {new URL(source.url).hostname}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </a>
+                        <button
+                          onClick={() => handleRemoveSource(source.id)}
+                          className={`p-1 rounded-full ${
+                            isDarkMode
+                              ? 'text-red-500 hover:text-red-700'
+                              : 'text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300'
+                          } print:hidden flex-shrink-0`}
+                          title="Remove source"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {showSourceInput === 'industry' ? (
+                    <div className="flex items-center gap-1 flex-wrap sm:flex-nowrap">
+                      <input
+                        type="text"
+                        value={newSourceUrl}
+                        onChange={(e) => setNewSourceUrl(e.target.value)}
+                        placeholder="Enter URL"
+                        className={`text-xs py-1 px-2 rounded-md border ${
+                          isDarkMode
+                            ? 'bg-gray-800 border-gray-700 text-white focus:ring-blue-500 focus:border-blue-500'
+                            : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
+                        } focus:outline-none focus:ring-2 w-full sm:w-auto text-[11px]`}
+                      />
+                      <div className="flex gap-1 mt-1 sm:mt-0">
+                        <button
+                          onClick={() => handleAddSource('industry')}
+                          className={`px-2 py-1 rounded-md text-[11px] ${
+                            isDarkMode
+                              ? 'bg-blue-600 text-white hover:bg-blue-700'
+                              : 'bg-blue-500 text-white hover:bg-blue-600'
+                          }`}
+                        >
+                          Add
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowSourceInput(null);
+                            setNewSourceUrl('');
+                          }}
+                          className={`px-2 py-1 rounded-md text-[11px] ${
+                            isDarkMode
+                              ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                              : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                          }`}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    null
+                  )}
+                </div>
               </Section>
 
               <Section
@@ -536,6 +792,124 @@ function App() {
                   onInput={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
                   className={textareaClass}
                 />
+                <div className="flex flex-wrap gap-2 items-center mt-2">
+                  <button
+                    onClick={() => setShowSourceInput('earnings')}
+                    className={`text-xs px-2 py-1 rounded-full ${
+                      isDarkMode
+                        ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
+                        : 'bg-gray-200 text-blue-600 hover:bg-gray-300'
+                    } flex items-center justify-center print:hidden`}
+                  >
+                    <span className="flex items-center justify-center w-4 h-4 rounded-full border border-current">+</span>
+                  </button>
+                  {sources.filter(source => source.section === 'earnings').map((source, index) => (
+                    <div key={source.id} className="relative group">
+                      <div className="flex items-center gap-1">
+                        <a
+                          href={source.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`text-xs px-2 py-1 rounded-full ${
+                            isDarkMode
+                              ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
+                              : 'bg-gray-200 text-blue-600 hover:bg-gray-300'
+                          } flex items-center gap-1 relative group`}
+                        >
+                          <span>({index + 1})</span>
+                          {/* Hover preview */}
+                          {linkPreviews[source.url] && (
+                            <div className="absolute bottom-full left-0 mb-2 w-64 hidden group-hover:block z-10">
+                              <div className={`rounded-lg shadow-lg overflow-hidden ${
+                                isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
+                              }`}>
+                                {linkPreviews[source.url].image && (
+                                  <div className="w-full h-32 bg-gray-100 overflow-hidden">
+                                    <img 
+                                      src={linkPreviews[source.url].image} 
+                                      alt={linkPreviews[source.url].title || 'Link preview'} 
+                                      className="w-full h-full object-cover"
+                                    />
+                                  </div>
+                                )}
+                                <div className="p-3">
+                                  <h4 className={`font-bold text-sm mb-1 truncate ${
+                                    isDarkMode ? 'text-white' : 'text-gray-800'
+                                  }`}>
+                                    {linkPreviews[source.url].title || new URL(source.url).hostname}
+                                  </h4>
+                                  <p className={`text-xs line-clamp-2 ${
+                                    isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                                  }`}>
+                                    {linkPreviews[source.url].description || 'No description available'}
+                                  </p>
+                                  <p className={`text-xs mt-1 truncate ${
+                                    isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                                  }`}>
+                                    {new URL(source.url).hostname}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </a>
+                        <button
+                          onClick={() => handleRemoveSource(source.id)}
+                          className={`p-1 rounded-full ${
+                            isDarkMode
+                              ? 'text-red-500 hover:text-red-700'
+                              : 'text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300'
+                          } print:hidden flex-shrink-0`}
+                          title="Remove source"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {showSourceInput === 'earnings' ? (
+                    <div className="flex items-center gap-1 flex-wrap sm:flex-nowrap">
+                      <input
+                        type="text"
+                        value={newSourceUrl}
+                        onChange={(e) => setNewSourceUrl(e.target.value)}
+                        placeholder="Enter URL"
+                        className={`text-xs py-1 px-2 rounded-md border ${
+                          isDarkMode
+                            ? 'bg-gray-800 border-gray-700 text-white focus:ring-blue-500 focus:border-blue-500'
+                            : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
+                        } focus:outline-none focus:ring-2 w-full sm:w-auto text-[11px]`}
+                      />
+                      <div className="flex gap-1 mt-1 sm:mt-0">
+                        <button
+                          onClick={() => handleAddSource('earnings')}
+                          className={`px-2 py-1 rounded-md text-[11px] ${
+                            isDarkMode
+                              ? 'bg-blue-600 text-white hover:bg-blue-700'
+                              : 'bg-blue-500 text-white hover:bg-blue-600'
+                          }`}
+                        >
+                          Add
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowSourceInput(null);
+                            setNewSourceUrl('');
+                          }}
+                          className={`px-2 py-1 rounded-md text-[11px] ${
+                            isDarkMode
+                              ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                              : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                          }`}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    null
+                  )}
+                </div>
               </Section>
 
               <Section
@@ -601,6 +975,126 @@ function App() {
                       + Add Development
                     </button>
                   )}
+                  
+                  {/* Add sources for developments section */}
+                  <div className="flex flex-wrap gap-2 items-center mt-4">
+                    <button
+                      onClick={() => setShowSourceInput('developments')}
+                      className={`text-xs px-2 py-1 rounded-full ${
+                        isDarkMode
+                          ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
+                          : 'bg-gray-200 text-blue-600 hover:bg-gray-300'
+                      } flex items-center justify-center print:hidden`}
+                    >
+                      <span className="flex items-center justify-center w-4 h-4 rounded-full border border-current">+</span>
+                    </button>
+                    {sources.filter(source => source.section === 'developments').map((source, index) => (
+                      <div key={source.id} className="relative group">
+                        <div className="flex items-center gap-1">
+                          <a
+                            href={source.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`text-xs px-2 py-1 rounded-full ${
+                              isDarkMode
+                                ? 'bg-gray-700 text-blue-400 hover:bg-gray-600'
+                                : 'bg-gray-200 text-blue-600 hover:bg-gray-300'
+                            } flex items-center gap-1 relative group`}
+                          >
+                            <span>({index + 1})</span>
+                            {/* Hover preview */}
+                            {linkPreviews[source.url] && (
+                              <div className="absolute bottom-full left-0 mb-2 w-64 hidden group-hover:block z-10">
+                                <div className={`rounded-lg shadow-lg overflow-hidden ${
+                                  isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
+                                }`}>
+                                  {linkPreviews[source.url].image && (
+                                    <div className="w-full h-32 bg-gray-100 overflow-hidden">
+                                      <img 
+                                        src={linkPreviews[source.url].image} 
+                                        alt={linkPreviews[source.url].title || 'Link preview'} 
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </div>
+                                  )}
+                                  <div className="p-3">
+                                    <h4 className={`font-bold text-sm mb-1 truncate ${
+                                      isDarkMode ? 'text-white' : 'text-gray-800'
+                                    }`}>
+                                      {linkPreviews[source.url].title || new URL(source.url).hostname}
+                                    </h4>
+                                    <p className={`text-xs line-clamp-2 ${
+                                      isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                                    }`}>
+                                      {linkPreviews[source.url].description || 'No description available'}
+                                    </p>
+                                    <p className={`text-xs mt-1 truncate ${
+                                      isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                                    }`}>
+                                      {new URL(source.url).hostname}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </a>
+                          <button
+                            onClick={() => handleRemoveSource(source.id)}
+                            className={`p-1 rounded-full ${
+                              isDarkMode
+                                ? 'text-red-500 hover:text-red-700'
+                                : 'text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300'
+                            } print:hidden flex-shrink-0`}
+                            title="Remove source"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    {showSourceInput === 'developments' ? (
+                      <div className="flex items-center gap-1 flex-wrap sm:flex-nowrap">
+                        <input
+                          type="text"
+                          value={newSourceUrl}
+                          onChange={(e) => setNewSourceUrl(e.target.value)}
+                          placeholder="Enter URL"
+                          className={`text-xs py-1 px-2 rounded-md border ${
+                            isDarkMode
+                              ? 'bg-gray-800 border-gray-700 text-white focus:ring-blue-500 focus:border-blue-500'
+                              : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500'
+                          } focus:outline-none focus:ring-2 w-full sm:w-auto text-[11px]`}
+                        />
+                        <div className="flex gap-1 mt-1 sm:mt-0">
+                          <button
+                            onClick={() => handleAddSource('developments')}
+                            className={`px-2 py-1 rounded-md text-[11px] ${
+                              isDarkMode
+                                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                : 'bg-blue-500 text-white hover:bg-blue-600'
+                            }`}
+                          >
+                            Add
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowSourceInput(null);
+                              setNewSourceUrl('');
+                            }}
+                            className={`px-2 py-1 rounded-md text-[11px] ${
+                              isDarkMode
+                                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                            }`}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      null
+                    )}
+                  </div>
                 </div>
               </Section>
 
