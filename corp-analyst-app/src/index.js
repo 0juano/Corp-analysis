@@ -12,6 +12,21 @@ const __dirname = path.dirname(__filename);
 // Load environment variables
 dotenv.config();
 
+// Global error handlers to prevent server crashes
+process.on('uncaughtException', (error) => {
+  console.error('UNCAUGHT EXCEPTION! ');
+  console.error(error.name, error.message);
+  console.error(error.stack);
+  // Keep the server running despite the error
+});
+
+process.on('unhandledRejection', (error) => {
+  console.error('UNHANDLED REJECTION! ');
+  console.error(error.name, error.message);
+  console.error(error.stack);
+  // Keep the server running despite the error
+});
+
 // Initialize Express app
 const app = express();
 
@@ -30,6 +45,12 @@ app.use(cors({
 
 app.use(express.json());
 
+// Add request logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
+
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -46,11 +67,15 @@ if (!process.env.COHERE_API_KEY) {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', message: 'Server is running' });
+  res.status(200).json({ 
+    status: 'ok', 
+    message: 'Server is running',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Chat analysis endpoint with web search
-app.post('/api/analyze', async (req, res) => {
+app.post('/api/analyze', async (req, res, next) => {
   const { message } = req.body;
   
   if (!message) {
@@ -60,7 +85,12 @@ app.post('/api/analyze', async (req, res) => {
   try {
     console.log('Received message:', message);
     
-    const response = await cohere.chat({
+    // Add timeout to prevent hanging requests
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Request timeout after 30 seconds')), 30000);
+    });
+    
+    const coherePromise = cohere.chat({
       message,
       model: 'command',
       connectors: [{ id: "web-search" }],
@@ -71,6 +101,9 @@ app.post('/api/analyze', async (req, res) => {
       temperature: 0.7,
     });
     
+    // Race between the API call and the timeout
+    const response = await Promise.race([coherePromise, timeoutPromise]);
+    
     console.log('Cohere API response received');
     
     res.json({
@@ -80,10 +113,9 @@ app.post('/api/analyze', async (req, res) => {
     });
   } catch (error) {
     console.error('Cohere API Error:', error);
-    res.status(500).json({ 
-      error: 'An error occurred during analysis',
-      message: error.message
-    });
+    
+    // Pass error to the error handling middleware
+    next(error);
   }
 });
 
@@ -92,12 +124,48 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Catch-all for undefined routes
+app.use('*', (req, res) => {
+  res.status(404).json({ error: 'Not found' });
+});
+
+// Error handling middleware (must be after routes)
+app.use((err, req, res, next) => {
+  console.error('Express error handler caught:', err);
+  
+  // Determine appropriate status code
+  const statusCode = err.statusCode || 500;
+  
+  // Send detailed error response
+  res.status(statusCode).json({ 
+    error: 'An error occurred during analysis',
+    message: err.message,
+    status: statusCode,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Start the server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
   console.log('Available endpoints:');
   console.log('- GET /: Web interface');
   console.log('- GET /health: Health check');
   console.log('- POST /api/analyze: Chat analysis with web search');
-}); 
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    console.log('Process terminated');
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT received, shutting down gracefully');
+  server.close(() => {
+    console.log('Process terminated');
+  });
+});

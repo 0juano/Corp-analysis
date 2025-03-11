@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+const http = require('http');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -26,6 +27,17 @@ app.use(cors());
 // Add request logging middleware
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
+
+// Add timeout middleware to prevent hanging requests
+app.use((req, res, next) => {
+  // Set a 30-second timeout for all requests
+  req.setTimeout(30000, () => {
+    const err = new Error('Request timeout after 30 seconds');
+    err.status = 408;
+    next(err);
+  });
   next();
 });
 
@@ -79,27 +91,48 @@ app.get('/api/yahoo-finance/search', async (req, res, next) => {
   } catch (error) {
     console.error('Error proxying Yahoo Finance request:', error);
     
-    // Provide detailed error information
-    res.status(500).json({ 
-      error: 'Failed to fetch data from Yahoo Finance',
-      details: error.message,
-      status: error.response ? error.response.status : 'unknown'
-    });
+    // Pass to error handling middleware
+    next(error);
   }
 });
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    service: 'yahoo-finance-proxy'
+  });
 });
 
 // Error handling middleware (must be after routes)
 app.use((err, req, res, next) => {
   console.error('Express error handler caught:', err);
-  res.status(500).json({ 
+  
+  // Determine appropriate status code
+  const statusCode = err.status || err.statusCode || 500;
+  
+  // Prepare error response
+  const errorResponse = { 
     error: 'Internal server error',
-    message: err.message
-  });
+    message: err.message,
+    status: statusCode,
+    timestamp: new Date().toISOString()
+  };
+  
+  // Add additional details for axios errors
+  if (err.isAxiosError) {
+    errorResponse.error = 'Failed to fetch data from Yahoo Finance';
+    errorResponse.details = err.message;
+    errorResponse.status = err.response ? err.response.status : 'unknown';
+    
+    // Add response data if available for debugging
+    if (err.response && err.response.data) {
+      errorResponse.responseData = err.response.data;
+    }
+  }
+  
+  res.status(statusCode).json(errorResponse);
 });
 
 // Catch-all for undefined routes
@@ -107,21 +140,52 @@ app.use('*', (req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
 
-const server = app.listen(PORT, () => {
+// Create HTTP server
+const server = http.createServer(app);
+
+// Add keep-alive settings to avoid connection issues
+server.keepAliveTimeout = 65000; // Ensure keep-alive connections stay alive longer than default
+server.headersTimeout = 66000; // Slightly longer than keepAliveTimeout
+
+// Start the server
+server.listen(PORT, () => {
   console.log(`Proxy server running on port ${PORT}`);
+  console.log('Available endpoints:');
+  console.log('- GET /api/yahoo-finance/search: Yahoo Finance search proxy');
+  console.log('- GET /health: Health check');
 });
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('SIGTERM received, shutting down gracefully');
+  
+  // First stop accepting new connections
   server.close(() => {
+    console.log('HTTP server closed');
+    // Process can exit now
     console.log('Process terminated');
   });
+  
+  // Force shutdown after 30 seconds if graceful shutdown fails
+  setTimeout(() => {
+    console.error('Forced shutdown after 30s timeout');
+    process.exit(1);
+  }, 30000);
 });
 
 process.on('SIGINT', () => {
   console.log('SIGINT received, shutting down gracefully');
+  
+  // First stop accepting new connections
   server.close(() => {
+    console.log('HTTP server closed');
+    // Process can exit now
     console.log('Process terminated');
   });
+  
+  // Force shutdown after 30 seconds if graceful shutdown fails
+  setTimeout(() => {
+    console.error('Forced shutdown after 30s timeout');
+    process.exit(1);
+  }, 30000);
 });
