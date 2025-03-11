@@ -41,6 +41,7 @@ function App() {
     isin, 
     setIsin, 
     companyName,
+    setCompanyName,
     ticker, 
     isSearching, 
     setIsSearching,
@@ -66,6 +67,7 @@ function App() {
     analysis: true,
     chat: true
   });
+  const [isBusinessLoading, setIsBusinessLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     business: '',
@@ -80,6 +82,23 @@ function App() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Set the preset ISIN value and company name
+  useEffect(() => {
+    // Set ISIN and company name directly
+    setIsin('US58733R1023');
+    setCompanyName('MercadoLibre, Inc.');
+    
+    // We can still trigger the search to get additional information like ticker
+    // but the company name will already be displayed
+    setTimeout(() => {
+      const event = new KeyboardEvent('keydown', { key: 'Enter' });
+      const isinInput = document.querySelector('input[placeholder="ISIN"]');
+      if (isinInput) {
+        isinInput.dispatchEvent(event);
+      }
+    }, 500);
+  }, [setIsin, setCompanyName]);
 
   const fetchLinkPreview = async (url: string) => {
     try {
@@ -254,7 +273,7 @@ function App() {
     isDarkMode
       ? 'bg-gray-900 border-gray-600 text-gray-100 focus:ring-blue-600 focus:border-blue-600 placeholder-gray-400'
       : 'bg-white border-gray-400 text-gray-900 focus:ring-blue-600 focus:border-blue-600 placeholder-gray-500'
-  } focus:outline-none focus:ring-2 w-full px-3 py-2`;
+  } focus:outline-none focus:ring-2 px-3 py-2`;
 
   const visibleDevelopments = formData.developments.filter(d => d.visible);
   const canAddDevelopment = visibleDevelopments.length < 5;
@@ -271,13 +290,48 @@ function App() {
     setExpandedSections(allExpanded);
   };
 
-  const handleRobotClick = () => {
-    // You can implement any functionality you want here
-    alert("Robot assistant activated for Business Overview!");
-    // Alternatively, you could:
-    // - Open a modal with AI suggestions
-    // - Trigger an API call to get AI-generated content
-    // - Toggle a special UI element
+  const handleRobotClick = async () => {
+    // Check if company name is available
+    if (!companyName) {
+      alert("Please enter a company name first");
+      return;
+    }
+
+    // Show loading indicator
+    setIsBusinessLoading(true);
+
+    try {
+      // Create the prompt with company name and ISIN
+      const companyIdentifier = isin 
+        ? `${companyName} (ISIN: ${isin})` 
+        : companyName;
+      
+      const prompt = `Create a business overview for ${companyIdentifier} in 80-90 words maximum. Clearly state: (1) what the company does and its industry; (2) primary products/services; (3) key markets and competitive position; (4) major competitive advantages; and (5) growth strategy. Use factual, precise language appropriate for financial documents like IPO prospectuses. Avoid promotional claims and focus only on essential information an investor would need to understand the core business. Conclude by listing 2-3 hyperlinked sources you referenced for this information (company website, annual report, etc.).`;
+
+      // Call the Cohere API through our backend
+      const response = await fetch('http://localhost:3000/api/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message: prompt })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get response from Cohere API');
+      }
+
+      const data = await response.json();
+      
+      // Update the business overview with the response
+      handleInputChange('business', data.analysis || "Could not generate business overview.");
+      
+    } catch (error) {
+      console.error('Error calling Cohere API for business overview:', error);
+      alert("Failed to generate business overview. Please try again later.");
+    } finally {
+      setIsBusinessLoading(false);
+    }
   };
 
   return (
@@ -295,8 +349,8 @@ function App() {
                     value={isin}
                     onChange={(e) => setIsin(e.target.value.toUpperCase())}
                     onKeyDown={handleIsinSubmit}
-                    placeholder="Enter ISIN"
-                    className={`${inputClass} py-1 px-2 w-32 text-lg font-mono uppercase`}
+                    placeholder="ISIN"
+                    className={`${inputClass} py-0.5 px-1.5 w-24 text-sm font-mono uppercase tracking-tight`}
                     maxLength={12}
                   />
                   {isSearching && (
@@ -382,6 +436,11 @@ function App() {
                 onRobotClick={handleRobotClick}
               >
                 <div className="space-y-2">
+                  {isBusinessLoading && (
+                    <div className="flex justify-center items-center py-2">
+                      <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary-600"></div>
+                    </div>
+                  )}
                   <ResizableTextarea
                     placeholder="Enter business overview..."
                     value={formData.business}
