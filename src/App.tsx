@@ -271,6 +271,15 @@ function App() {
     setExpandedSections(allExpanded);
   };
 
+  const handleRobotClick = () => {
+    // You can implement any functionality you want here
+    alert("Robot assistant activated for Business Overview!");
+    // Alternatively, you could:
+    // - Open a modal with AI suggestions
+    // - Trigger an API call to get AI-generated content
+    // - Toggle a special UI element
+  };
+
   return (
     <div className={`min-h-screen ${isDarkMode ? 'dark bg-gray-900' : 'bg-white'}`}>
       <div className="flex flex-col md:flex-row h-screen relative">
@@ -370,6 +379,7 @@ function App() {
                 isExpanded={expandedSections.business}
                 onToggle={() => toggleSection('business')}
                 isDarkMode={isDarkMode}
+                onRobotClick={handleRobotClick}
               >
                 <div className="space-y-2">
                   <ResizableTextarea
@@ -1335,9 +1345,10 @@ interface SectionProps {
   isExpanded: boolean;
   onToggle: () => void;
   isDarkMode: boolean;
+  onRobotClick?: () => void;
 }
 
-function Section({ title, children, isExpanded, onToggle, isDarkMode }: SectionProps) {
+function Section({ title, children, isExpanded, onToggle, isDarkMode, onRobotClick }: SectionProps) {
   return (
     <div className={`mb-8 rounded-xl overflow-hidden transition-all duration-200 ${
       isDarkMode 
@@ -1350,10 +1361,30 @@ function Section({ title, children, isExpanded, onToggle, isDarkMode }: SectionP
             ? 'bg-gradient-to-r from-gray-800 to-gray-900 text-white border-b border-gray-700' 
             : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-900 border-b border-gray-300'
         }`}
-        onClick={onToggle}
       >
-        <h2 className="text-lg font-semibold tracking-wide">{title}</h2>
-        <div className="bg-opacity-20 p-1.5 rounded-full transition-colors duration-200 hover:bg-white hover:bg-opacity-10">
+        <div className="flex items-center gap-2" onClick={onToggle}>
+          <h2 className="text-lg font-semibold tracking-wide">{title}</h2>
+          {title === "Business Overview" && (
+            <button 
+              className={`p-1.5 text-lg rounded-full transition-colors duration-200 flex items-center justify-center ${
+                isDarkMode 
+                  ? 'bg-gray-700 hover:bg-gray-600 text-green-500' 
+                  : 'bg-gray-300 hover:bg-gray-400 text-green-600'
+              }`}
+              aria-label="Robot assistant"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent section toggle
+                if (onRobotClick) onRobotClick();
+              }}
+            >
+              <Bot size={18} className="text-green-500" />
+            </button>
+          )}
+        </div>
+        <div 
+          className="bg-opacity-20 p-1.5 rounded-full transition-colors duration-200 hover:bg-white hover:bg-opacity-10"
+          onClick={onToggle}
+        >
           {isExpanded ? 
             <ChevronUp size={20} className={`${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`} /> : 
             <ChevronDown size={20} className={`${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`} />
