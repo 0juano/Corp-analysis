@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const http = require('http');
+const { createHttpTerminator } = require('http-terminator');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -143,6 +144,9 @@ app.use('*', (req, res) => {
 // Create HTTP server
 const server = http.createServer(app);
 
+// Create HTTP terminator for graceful shutdown
+const httpTerminator = createHttpTerminator({ server });
+
 // Add keep-alive settings to avoid connection issues
 server.keepAliveTimeout = 65000; // Ensure keep-alive connections stay alive longer than default
 server.headersTimeout = 66000; // Slightly longer than keepAliveTimeout
@@ -155,37 +159,37 @@ server.listen(PORT, () => {
   console.log('- GET /health: Health check');
 });
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
+// Graceful shutdown with improved handling
+const gracefulShutdown = async (signal) => {
+  console.log(`${signal} received, shutting down gracefully`);
   
-  // First stop accepting new connections
-  server.close(() => {
-    console.log('HTTP server closed');
-    // Process can exit now
-    console.log('Process terminated');
-  });
-  
-  // Force shutdown after 30 seconds if graceful shutdown fails
-  setTimeout(() => {
-    console.error('Forced shutdown after 30s timeout');
+  try {
+    // First terminate all HTTP connections
+    await httpTerminator.terminate();
+    console.log('HTTP server closed gracefully');
+    
+    // Close any database connections or other resources here
+    // ...
+    
+    console.log('All resources closed, process terminating');
+    process.exit(0);
+  } catch (error) {
+    console.error('Error during graceful shutdown:', error);
     process.exit(1);
-  }, 30000);
-});
+  }
+};
 
-process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully');
-  
-  // First stop accepting new connections
-  server.close(() => {
-    console.log('HTTP server closed');
-    // Process can exit now
-    console.log('Process terminated');
-  });
-  
-  // Force shutdown after 30 seconds if graceful shutdown fails
+// Set up signal handlers
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// Force shutdown after 30 seconds if graceful shutdown fails
+const forceShutdown = (signal) => {
   setTimeout(() => {
-    console.error('Forced shutdown after 30s timeout');
+    console.error(`Forced shutdown after 30s timeout (${signal})`);
     process.exit(1);
   }, 30000);
-});
+};
+
+process.on('SIGTERM', () => forceShutdown('SIGTERM'));
+process.on('SIGINT', () => forceShutdown('SIGINT'));

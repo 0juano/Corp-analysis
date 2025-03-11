@@ -1,7 +1,7 @@
 {
-  "name": "corp-analyst-server",
+  "name": "@corp-analyst/yahoo-proxy",
   "version": "1.0.0",
-  "description": "Backend server for Corp Analyst application",
+  "description": "Yahoo Finance proxy server with improved stability",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -10,7 +10,8 @@
   "dependencies": {
     "axios": "^1.8.2",
     "cors": "^2.8.5",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "http-terminator": "^3.2.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

@@ -37,30 +37,23 @@ cd corp-analyst
 # Install dependencies
 npm install
 
-# Start the development server
-npm run dev
+# Start all services (client, Yahoo Finance proxy, and Analysis Assistant)
+./start.sh
 ```
 
 Visit `http://localhost:5173` to see the application.
 
-### Setting up the Proxy Server
+### Services
 
-The application uses a proxy server to avoid CORS issues when fetching data from the Yahoo Finance API.
+The application consists of three main services:
 
-```bash
-# Navigate to the server directory
-cd server
+1. **Client App** (port 5173): React frontend with TypeScript and Tailwind CSS
+2. **Yahoo Finance Proxy** (port 3001): Proxy server to avoid CORS issues when fetching data from Yahoo Finance API
+3. **Analysis Assistant** (port 3000): Cohere API-powered analysis assistant with web search capabilities
 
-# Install server dependencies
-npm install
+All services can be started together using the `./start.sh` script.
 
-# Start the server
-node server.js
-```
-
-The proxy server will run on port 3001. Make sure it's running when using the ISIN lookup feature.
-
-#### Testing the Proxy Server
+#### Testing the Yahoo Finance Proxy
 
 You can test if the proxy server is working correctly with:
 
@@ -69,8 +62,6 @@ curl -s "http://localhost:3001/api/yahoo-finance/search?isin=US0378331005" | jq
 ```
 
 This should return information about Apple Inc.
-
-For more details, see [server/README.md](server/README.md).
 
 ## Development Standards
 
@@ -88,16 +79,29 @@ For more details, see [.claude/documentation/coding_standards.md](.claude/docume
 ## Project Structure
 
 ```
-src/
-├── components/     # UI components
-├── hooks/          # Custom React hooks
-├── contexts/       # React contexts
-├── types/          # TypeScript interfaces and types
-├── utils/          # Utility functions
-├── App.tsx         # Main application component
-├── main.tsx        # Application entry point
-└── index.css       # Global styles
-server/             # Proxy server for API requests
+packages/
+├── client/           # React frontend application
+│   ├── src/          # Frontend source code
+│   │   ├── components/  # UI components
+│   │   ├── hooks/       # Custom React hooks
+│   │   ├── contexts/    # React contexts
+│   │   ├── types/       # TypeScript interfaces and types
+│   │   ├── utils/       # Utility functions
+│   │   ├── App.tsx      # Main application component
+│   │   └── main.tsx     # Application entry point
+│   └── ...           # Configuration files
+├── yahoo-proxy/      # Yahoo Finance proxy server (port 3001)
+│   └── server.js     # Express server for Yahoo Finance API
+└── analysis-assistant/ # Cohere API assistant server (port 3000)
+    └── src/          # Analysis assistant source code
+        ├── index.js  # Express server for Cohere API
+        └── public/   # Static files for the assistant
+
+scripts/              # Utility scripts
+├── start-all.js      # Node.js script to start all services
+
+shared/               # Shared utilities and types
+└── utils/            # Shared utility functions
 ```
 
 ## Recent Updates
@@ -117,4 +121,4 @@ The build artifacts will be stored in the `dist/` directory.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+This project is licensed under the MIT License - see the LICENSE file for details.

@@ -43,6 +43,7 @@ function App() {
     companyName,
     setCompanyName,
     ticker, 
+    setTicker,
     isSearching, 
     setIsSearching,
     searchError,
@@ -88,6 +89,7 @@ function App() {
     // Set ISIN and company name directly
     setIsin('US58733R1023');
     setCompanyName('MercadoLibre, Inc.');
+    setTicker('MELI'); // Add the ticker symbol directly
     
     // We can still trigger the search to get additional information like ticker
     // but the company name will already be displayed
@@ -98,7 +100,7 @@ function App() {
         isinInput.dispatchEvent(event);
       }
     }, 500);
-  }, [setIsin, setCompanyName]);
+  }, [setIsin, setCompanyName, setTicker]);
 
   const fetchLinkPreview = async (url: string) => {
     try {
@@ -362,7 +364,7 @@ function App() {
                 
                 {/* Company Name & Ticker - Middle with truncation */}
                 {(isSearching || companyName) && (
-                  <div className={`${isDarkMode ? 'text-gray-300' : 'text-gray-700'} flex-1 min-w-0 mx-4`}>
+                  <div className={`flex flex-col items-start justify-center ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} flex-1 min-w-0 mx-4`}>
                     {isSearching ? (
                       <span className="animate-pulse text-lg">Searching...</span>
                     ) : (
@@ -1422,7 +1424,7 @@ function Section({ title, children, isExpanded, onToggle, isDarkMode, onRobotCli
         }`}
       >
         <div className="flex items-center gap-2" onClick={onToggle}>
-          <h2 className="text-lg font-semibold tracking-wide">{title}</h2>
+          <h2 className="text-lg font-bold tracking-wide">{title}</h2>
           {title === "Business Overview" && (
             <button 
               className={`p-1.5 text-lg rounded-full transition-colors duration-200 flex items-center justify-center ${

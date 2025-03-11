@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import { CohereClient } from 'cohere-ai';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import http from 'http';
+import { createHttpTerminator } from 'http-terminator';
 
 // Get directory name in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -48,6 +50,17 @@ app.use(express.json());
 // Add request logging middleware
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
+
+// Add timeout middleware to prevent hanging requests
+app.use((req, res, next) => {
+  // Set a 30-second timeout for all requests
+  req.setTimeout(30000, () => {
+    const err = new Error('Request timeout after 30 seconds');
+    err.status = 408;
+    next(err);
+  });
   next();
 });
 
@@ -145,9 +158,15 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Create HTTP server
+const server = http.createServer(app);
+
+// Create HTTP terminator for graceful shutdown
+const httpTerminator = createHttpTerminator({ server });
+
 // Start the server
 const PORT = process.env.PORT || 3000;
-const server = app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
   console.log('Available endpoints:');
   console.log('- GET /: Web interface');
@@ -155,17 +174,37 @@ const server = app.listen(PORT, () => {
   console.log('- POST /api/analyze: Chat analysis with web search');
 });
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
-  server.close(() => {
-    console.log('Process terminated');
-  });
-});
+// Graceful shutdown with improved handling
+const gracefulShutdown = async (signal) => {
+  console.log(`${signal} received, shutting down gracefully`);
+  
+  try {
+    // First terminate all HTTP connections
+    await httpTerminator.terminate();
+    console.log('HTTP server closed gracefully');
+    
+    // Close any database connections or other resources here
+    // ...
+    
+    console.log('All resources closed, process terminating');
+    process.exit(0);
+  } catch (error) {
+    console.error('Error during graceful shutdown:', error);
+    process.exit(1);
+  }
+};
 
-process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully');
-  server.close(() => {
-    console.log('Process terminated');
-  });
-});
+// Set up signal handlers
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// Force shutdown after 30 seconds if graceful shutdown fails
+const forceShutdown = (signal) => {
+  setTimeout(() => {
+    console.error(`Forced shutdown after 30s timeout (${signal})`);
+    process.exit(1);
+  }, 30000);
+};
+
+process.on('SIGTERM', () => forceShutdown('SIGTERM'));
+process.on('SIGINT', () => forceShutdown('SIGINT'));
