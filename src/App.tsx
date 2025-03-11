@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Sun, Moon, ChevronUp, ChevronDown, X, Search, Printer, Send, Bot } from 'lucide-react';
+import ResizableTextarea from './components/ResizableTextarea';
 import { useSearch } from './hooks/useSearch';
 
 interface Development {
@@ -79,32 +80,6 @@ function App() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
-  // Adjust textarea heights on mount and when developments change
-  useEffect(() => {
-    if (expandedSections.developments) {
-      adjustAllTextareaHeights('.developments-section textarea');
-    }
-    
-    if (expandedSections.analysis) {
-      adjustAllTextareaHeights('.analysis-section textarea');
-    }
-  }, [
-    expandedSections.developments, 
-    expandedSections.analysis, 
-    formData.developments.filter(d => d.visible).length
-  ]);
-
-  // Apply dark mode class to body
-  useEffect(() => {
-    if (isDarkMode) {
-      document.body.classList.add('dark');
-      document.body.classList.remove('light');
-    } else {
-      document.body.classList.add('light');
-      document.body.classList.remove('dark');
-    }
-  }, [isDarkMode]);
 
   const fetchLinkPreview = async (url: string) => {
     try {
@@ -223,9 +198,6 @@ function App() {
       [field]: value
     };
     setFormData(prev => ({ ...prev, developments }));
-    
-    // Adjust heights of all development textareas
-    adjustAllTextareaHeights('.developments-section textarea');
   };
 
   const handlePointChange = (section: 'positives' | 'negatives', index: number, value: string) => {
@@ -256,9 +228,6 @@ function App() {
     const developments = [...formData.developments];
     developments[index] = { ...developments[index], visible: false };
     setFormData(prev => ({ ...prev, developments }));
-    
-    // Adjust heights of all development textareas
-    adjustAllTextareaHeights('.developments-section textarea');
   };
 
   const addDevelopment = () => {
@@ -267,9 +236,6 @@ function App() {
     if (nextIndex !== -1) {
       developments[nextIndex] = { emoji: 'up', text: '', visible: true };
       setFormData(prev => ({ ...prev, developments }));
-      
-      // Adjust heights of all development textareas
-      adjustAllTextareaHeights('.developments-section textarea');
     }
   };
 
@@ -289,34 +255,6 @@ function App() {
       ? 'bg-gray-900 border-gray-600 text-gray-100 focus:ring-blue-600 focus:border-blue-600 placeholder-gray-400'
       : 'bg-white border-gray-400 text-gray-900 focus:ring-blue-600 focus:border-blue-600 placeholder-gray-500'
   } focus:outline-none focus:ring-2 w-full px-3 py-2`;
-
-  const textareaClass = `${inputClass} min-h-[100px] resize-none w-full`;
-  
-  const multilineInputClass = `${inputClass} h-[32px] min-h-[32px] resize-none overflow-hidden`;
-
-  const adjustHeight = (element: HTMLTextAreaElement) => {
-    // Reset height to minimum to accurately calculate the new height
-    element.style.height = '32px';
-    // Get the scrollHeight which represents the height needed to fit all content
-    const scrollHeight = element.scrollHeight;
-    // If content requires more height than minimum, adjust it
-    if (scrollHeight > 32) {
-      element.style.height = `${Math.min(scrollHeight, 200)}px`;
-    } else {
-      // Ensure height is set to minimum when content doesn't require more space
-      element.style.height = '32px';
-    }
-  };
-
-  // Helper function to adjust heights of all textareas in a section
-  const adjustAllTextareaHeights = (selector: string) => {
-    setTimeout(() => {
-      const textareas = document.querySelectorAll(selector);
-      textareas.forEach(textarea => {
-        adjustHeight(textarea as HTMLTextAreaElement);
-      });
-    }, 0);
-  };
 
   const visibleDevelopments = formData.developments.filter(d => d.visible);
   const canAddDevelopment = visibleDevelopments.length < 5;
@@ -434,15 +372,18 @@ function App() {
                 isDarkMode={isDarkMode}
               >
                 <div className="space-y-2">
-                  <textarea
+                  <ResizableTextarea
                     placeholder="Enter business overview..."
                     value={formData.business}
                     onChange={(e) => {
                       handleInputChange('business', e.target.value);
-                      adjustHeight(e.target);
                     }}
-                    onInput={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
-                    className={textareaClass}
+                    className={`
+                      w-full
+                      bg-transparent text-white
+                      border border-gray-700 rounded-md
+                      focus:outline-none focus:border-blue-500
+                    `}
                   />
                   <div className="flex flex-wrap gap-2 items-center mt-2">
                     <button
@@ -571,15 +512,18 @@ function App() {
                 onToggle={() => toggleSection('ownership')}
                 isDarkMode={isDarkMode}
               >
-                <textarea
+                <ResizableTextarea
                   placeholder="Enter ownership and management details..."
                   value={formData.ownership}
                   onChange={(e) => {
                     handleInputChange('ownership', e.target.value);
-                    adjustHeight(e.target);
                   }}
-                  onInput={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
-                  className={textareaClass}
+                  className={`
+                    w-full
+                    bg-transparent text-white
+                    border border-gray-700 rounded-md
+                    focus:outline-none focus:border-blue-500
+                  `}
                 />
                 <div className="flex flex-wrap gap-2 items-center mt-2">
                   <button
@@ -707,15 +651,18 @@ function App() {
                 onToggle={() => toggleSection('industry')}
                 isDarkMode={isDarkMode}
               >
-                <textarea
+                <ResizableTextarea
                   placeholder="Enter industry and competition analysis..."
                   value={formData.industry}
                   onChange={(e) => {
                     handleInputChange('industry', e.target.value);
-                    adjustHeight(e.target);
                   }}
-                  onInput={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
-                  className={textareaClass}
+                  className={`
+                    w-full
+                    bg-transparent text-white
+                    border border-gray-700 rounded-md
+                    focus:outline-none focus:border-blue-500
+                  `}
                 />
                 <div className="flex flex-wrap gap-2 items-center mt-2">
                   <button
@@ -843,15 +790,18 @@ function App() {
                 onToggle={() => toggleSection('earnings')}
                 isDarkMode={isDarkMode}
               >
-                <textarea
+                <ResizableTextarea
                   placeholder="Enter earnings and financial details..."
                   value={formData.earnings}
                   onChange={(e) => {
                     handleInputChange('earnings', e.target.value);
-                    adjustHeight(e.target);
                   }}
-                  onInput={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
-                  className={textareaClass}
+                  className={`
+                    w-full
+                    bg-transparent text-white
+                    border border-gray-700 rounded-md
+                    focus:outline-none focus:border-blue-500
+                  `}
                 />
                 <div className="flex flex-wrap gap-2 items-center mt-2">
                   <button
@@ -999,18 +949,18 @@ function App() {
                         </button>
                       </div>
                       <div className="flex-grow">
-                        <textarea
+                        <ResizableTextarea
                           placeholder={`Development ${index + 1}`}
                           value={development.text}
                           onChange={(e) => {
                             handleDevelopmentChange(index, 'text', e.target.value);
-                            adjustHeight(e.target);
                           }}
-                          onFocus={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
-                          onInput={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
-                          onKeyUp={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
-                          onPaste={(e) => setTimeout(() => adjustHeight(e.target as HTMLTextAreaElement), 0)}
-                          className={`${multilineInputClass} flex-grow`}
+                          className={`
+                            w-full
+                            bg-transparent text-white
+                            border border-gray-700 rounded-md
+                            focus:outline-none focus:border-blue-500
+                          `}
                         />
                       </div>
                       <button
@@ -1174,18 +1124,18 @@ function App() {
                         <div className="space-y-2">
                           {formData.positives.filter(p => p.visible).map((point, index) => (
                             <div key={`positive-${index}`} className="flex items-center gap-2">
-                              <textarea
+                              <ResizableTextarea
                                 placeholder={`Positive ${index + 1}`}
                                 value={point.text}
                                 onChange={(e) => {
                                   handlePointChange('positives', index, e.target.value);
-                                  adjustHeight(e.target);
                                 }}
-                                onFocus={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
-                                onInput={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
-                                onKeyUp={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
-                                onPaste={(e) => setTimeout(() => adjustHeight(e.target as HTMLTextAreaElement), 0)}
-                                className={`${multilineInputClass} flex-grow`}
+                                className={`
+                                  w-full
+                                  bg-transparent text-white
+                                  border border-gray-700 rounded-md
+                                  focus:outline-none focus:border-blue-500
+                                `}
                               />
                               <button
                                 onClick={() => removePoint('positives', index)}
@@ -1218,18 +1168,18 @@ function App() {
                         <div className="space-y-2">
                           {formData.negatives.filter(p => p.visible).map((point, index) => (
                             <div key={`negative-${index}`} className="flex items-center gap-2">
-                              <textarea
+                              <ResizableTextarea
                                 placeholder={`Negative ${index + 1}`}
                                 value={point.text}
                                 onChange={(e) => {
                                   handlePointChange('negatives', index, e.target.value);
-                                  adjustHeight(e.target);
                                 }}
-                                onFocus={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
-                                onInput={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
-                                onKeyUp={(e) => adjustHeight(e.target as HTMLTextAreaElement)}
-                                onPaste={(e) => setTimeout(() => adjustHeight(e.target as HTMLTextAreaElement), 0)}
-                                className={`${multilineInputClass} flex-grow`}
+                                className={`
+                                  w-full
+                                  bg-transparent text-white
+                                  border border-gray-700 rounded-md
+                                  focus:outline-none focus:border-blue-500
+                                `}
                               />
                               <button
                                 onClick={() => removePoint('negatives', index)}
@@ -1335,31 +1285,29 @@ function App() {
             )}
             <div ref={chatEndRef} />
           </div>
-          <form onSubmit={handleSendMessage} className={`p-4 border-t ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-300 bg-gray-200'}`}>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={currentMessage}
-                onChange={(e) => setCurrentMessage(e.target.value)}
-                placeholder="Ask for help analyzing..."
-                className={`flex-1 rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${
-                  isDarkMode
-                    ? 'bg-gray-700 text-white placeholder-gray-400 focus:ring-blue-500'
-                    : 'bg-white text-gray-800 placeholder-gray-500 border border-gray-300 focus:ring-blue-500'
-                }`}
-              />
-              <button
-                type="submit"
-                className={`p-2 rounded-md focus:outline-none focus:ring-2 ${
-                  isDarkMode
-                    ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
-                    : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
-                }`}
-                disabled={!currentMessage.trim()}
-              >
-                <Send className="h-5 w-5" />
-              </button>
-            </div>
+          <form onSubmit={handleSendMessage} className={`p-4 border-t ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-300 bg-gray-200'} flex justify-between items-center`}>
+            <input
+              type="text"
+              value={currentMessage}
+              onChange={(e) => setCurrentMessage(e.target.value)}
+              placeholder="Ask for help analyzing..."
+              className={`flex-1 rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${
+                isDarkMode
+                  ? 'bg-gray-700 text-white placeholder-gray-400 focus:ring-blue-500'
+                  : 'bg-white text-gray-800 placeholder-gray-500 border border-gray-300 focus:ring-blue-500'
+              }`}
+            />
+            <button
+              type="submit"
+              className={`p-2 rounded-md focus:outline-none focus:ring-2 ${
+                isDarkMode
+                  ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+                  : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+              }`}
+              disabled={!currentMessage.trim()}
+            >
+              <Send className="h-5 w-5" />
+            </button>
           </form>
         </div>
         
