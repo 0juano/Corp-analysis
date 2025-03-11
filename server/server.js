@@ -5,6 +5,21 @@ const axios = require('axios');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Global error handlers to prevent server crashes
+process.on('uncaughtException', (error) => {
+  console.error('UNCAUGHT EXCEPTION! ');
+  console.error(error.name, error.message);
+  console.error(error.stack);
+  // Keep the server running despite the error
+});
+
+process.on('unhandledRejection', (error) => {
+  console.error('UNHANDLED REJECTION! ');
+  console.error(error.name, error.message);
+  console.error(error.stack);
+  // Keep the server running despite the error
+});
+
 // Enable CORS for all routes
 app.use(cors());
 
@@ -15,7 +30,7 @@ app.use((req, res, next) => {
 });
 
 // Yahoo Finance proxy endpoint
-app.get('/api/yahoo-finance/search', async (req, res) => {
+app.get('/api/yahoo-finance/search', async (req, res, next) => {
   try {
     const { isin } = req.query;
     
@@ -36,7 +51,8 @@ app.get('/api/yahoo-finance/search', async (req, res) => {
       },
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-      }
+      },
+      timeout: 10000 // Add timeout to prevent hanging requests
     });
     
     console.log(`Yahoo Finance response status: ${response.status}`);
@@ -74,9 +90,38 @@ app.get('/api/yahoo-finance/search', async (req, res) => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.listen(PORT, () => {
+// Error handling middleware (must be after routes)
+app.use((err, req, res, next) => {
+  console.error('Express error handler caught:', err);
+  res.status(500).json({ 
+    error: 'Internal server error',
+    message: err.message
+  });
+});
+
+// Catch-all for undefined routes
+app.use('*', (req, res) => {
+  res.status(404).json({ error: 'Not found' });
+});
+
+const server = app.listen(PORT, () => {
   console.log(`Proxy server running on port ${PORT}`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    console.log('Process terminated');
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT received, shutting down gracefully');
+  server.close(() => {
+    console.log('Process terminated');
+  });
 });
