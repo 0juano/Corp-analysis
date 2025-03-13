@@ -1,0 +1,23 @@
+{
+  "name": "Corp Analyst",
+  "short_name": "Corp Analyst",
+  "description": "Advanced corporate data analysis tool for business intelligence and financial insights",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1E293B",
+  "theme_color": "#2563EB",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+} 
